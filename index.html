@@ -1,0 +1,1039 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Alltech Biomassa — Formulário de Campo</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#C55628">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="icon" href="./icon-192.png">
+<style>
+  :root {
+    --bg: #F7F7F5;
+    --surface: #FFFFFF;
+    --surface-2: #F0F0ED;
+    --border: #E1DFDB;
+    --border-strong: #CBC9C4;
+    --text: #1A1A1A;
+    --text-secondary: #5C5B57;
+    --text-muted: #8D8C87;
+    --accent-900: #3D1A0C;
+    --accent-700: #7A331A;
+    --accent-600: #C55628;
+    --accent-100: #F7E3D8;
+    --amber-700: #7A5710;
+    --amber-600: #BD8A25;
+    --amber-100: #F5EAD1;
+    --green-700: #1F5E33;
+    --green-600: #2E8B47;
+    --green-100: #E1F2E5;
+    --blue-700: #1D4E7A;
+    --blue-600: #2E76B8;
+    --blue-100: #DEEAF5;
+    --red-600: #B33F3F;
+    --red-700: #7A2424;
+    --red-100: #F6DEDE;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    --radius: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #131313; --surface: #1D1D1D; --surface-2: #242422;
+      --border: #333331; --border-strong: #46443F;
+      --text: #F2F2EF; --text-secondary: #B7B6B0; --text-muted: #86857F;
+      --accent-900: #F6DFCE; --accent-700: #E3A97E; --accent-600: #D2814B; --accent-100: #3A2417;
+      --amber-700: #EFD68C; --amber-600: #D9B662; --amber-100: #3A311A;
+      --green-700: #B7E3C4; --green-600: #5FBE7C; --green-100: #1B3323;
+      --blue-700: #B9D8EF; --blue-600: #6BA8DC; --blue-100: #1B2C3A;
+      --red-600: #DB7F7F;
+      --red-700: #F0B0B0;
+      --red-100: #3A1F1F;
+    }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; background: var(--bg); }
+  body { font-family: var(--sans); color: var(--text); font-size: 15px; line-height: 1.45; }
+  #shell { max-width: 440px; margin: 0 auto; min-height: 100vh; background: var(--bg); display: flex; flex-direction: column; position: relative; }
+
+  .bar { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--surface); }
+  .bar-back { border: none; background: none; color: var(--text); font-size: 20px; line-height: 1; cursor: pointer; padding: 4px 6px 4px 0; }
+  .bar-title { font-size: 16px; font-weight: 600; flex: 1; }
+  .conn-pill { font-size: 11px; padding: 3px 8px; border-radius: 99px; font-weight: 500; white-space: nowrap; }
+  .conn-online { background: var(--green-100); color: var(--green-700); }
+  .conn-offline { background: var(--amber-100); color: var(--amber-700); }
+
+  #content { flex: 1; overflow-y: auto; padding: 16px; }
+
+  .logo-row { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+  .logo-row img { height: 24px; width: auto; }
+  .logo-row span { font-size: 13px; color: var(--text-muted); }
+
+  .visit-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; cursor: pointer; }
+  .visit-card .vname { font-size: 15px; font-weight: 600; }
+  .visit-card .vmeta { font-size: 12.5px; color: var(--text-secondary); margin-top: 2px; }
+  .visit-card .vprogress { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+  .visit-card .vtrack { flex: 1; height: 5px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+  .visit-card .vtrack > span { display: block; height: 100%; background: var(--accent-600); }
+  .visit-card .vpct { font-size: 11.5px; color: var(--text-secondary); font-family: var(--mono); }
+  .sync-tag { font-size: 10.5px; padding: 2px 7px; border-radius: 99px; font-weight: 500; margin-top: 8px; display: inline-block; }
+  .sync-rascunho { background: var(--blue-100); color: var(--blue-700); }
+  .sync-pendente { background: var(--amber-100); color: var(--amber-700); }
+  .sync-sincronizado { background: var(--green-100); color: var(--green-700); }
+
+  .btn-primary { width: 100%; padding: 13px; border-radius: var(--radius); border: none; background: var(--accent-600); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .btn-primary:active { opacity: 0.85; }
+  .btn-secondary { width: 100%; padding: 12px; border-radius: var(--radius); border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); font-size: 14px; font-weight: 500; cursor: pointer; }
+
+  .visit-header { margin-bottom: 14px; }
+  .visit-header .vname { font-size: 18px; font-weight: 600; }
+  .visit-header .vmeta { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+  .overall-progress { display: flex; align-items: center; gap: 8px; margin: 12px 0 16px; }
+  .overall-progress .track { flex: 1; height: 6px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+  .overall-progress .track > span { display: block; height: 100%; background: var(--accent-600); }
+  .overall-progress .lbl { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+
+  .section-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 4px; border-top: 1px solid var(--border); cursor: pointer; }
+  .section-row:first-child { border-top: none; }
+  .section-row .left { display: flex; align-items: center; gap: 10px; }
+  .status-dot { width: 9px; height: 9px; border-radius: 99px; flex-shrink: 0; }
+  .status-done { background: var(--green-600); }
+  .status-partial { background: var(--amber-600); }
+  .status-pending { background: var(--text-muted); opacity: 0.5; }
+  .section-row .stitle { font-size: 14.5px; }
+  .section-row .sright { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+  .chev { color: var(--text-muted); font-size: 16px; }
+
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12.5px; color: var(--text-secondary); margin-bottom: 5px; }
+  .field input[type="text"], .field input[type="number"], .field input[type="date"], .field input[type="time"], .field textarea {
+    width: 100%; padding: 11px 12px; border-radius: 10px; border: 1px solid var(--border-strong);
+    background: var(--surface); color: var(--text); font-size: 15px; font-family: var(--sans);
+  }
+  .field textarea { min-height: 72px; resize: vertical; }
+  .unit-wrap { position: relative; }
+  .unit-wrap input { padding-right: 46px; }
+  .unit-suffix { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 12.5px; color: var(--text-muted); pointer-events: none; }
+  .toggle-group { display: flex; gap: 8px; }
+  .toggle-btn { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-secondary); font-size: 14px; font-weight: 500; cursor: pointer; text-align: center; }
+  .toggle-btn.active-yes { background: var(--green-100); color: var(--green-700); border-color: var(--green-600); }
+  .toggle-btn.active-no { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .toggle-btn.active-pick { background: var(--accent-100); color: var(--accent-700); border-color: var(--accent-600); }
+  .range-row { display: flex; align-items: center; gap: 10px; }
+  .range-row input[type="range"] { flex: 1; }
+  .range-val { font-family: var(--mono); font-size: 14px; min-width: 52px; text-align: right; }
+  .photo-slot { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px dashed var(--border-strong); border-radius: 10px; cursor: pointer; }
+  .photo-slot .thumb { width: 44px; height: 44px; border-radius: 8px; background: var(--surface-2); flex-shrink: 0; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--text-muted); }
+  .photo-slot .ptext { font-size: 13.5px; color: var(--text-secondary); }
+
+  .picker-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 11px 12px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); font-size: 15px; font-family: var(--sans); cursor: pointer; text-align: left; }
+  .picker-btn .ph { color: var(--text-muted); }
+  .picker-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+  .field-note { font-size: 11.5px; color: var(--text-muted); margin-top: 4px; }
+
+  .gps-box { border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+  .gps-result { font-family: var(--mono); font-size: 13px; margin-top: 10px; color: var(--text-secondary); }
+  .gps-result b { color: var(--text); }
+  .gps-error { font-size: 12.5px; color: var(--red-600); margin-top: 8px; }
+  .gps-success { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--green-700); background: var(--green-100); border-radius: 8px; padding: 7px 10px; margin-top: 10px; }
+  .gps-warning { font-size: 11.5px; color: var(--amber-700); background: var(--amber-100); border-radius: 8px; padding: 7px 10px; margin-top: 8px; }
+
+  .save-toast { position: absolute; left: 0; right: 0; bottom: 82px; text-align: center; font-size: 11.5px; color: var(--green-700); opacity: 0; transition: opacity 0.4s; pointer-events: none; z-index: 15; }
+  .save-toast.show { opacity: 1; }
+  .section-footer { margin-top: 10px; padding-bottom: 24px; display: flex; flex-direction: column; gap: 8px; }
+
+  /* picker overlay (bottom sheet) */
+  .picker-overlay { position: fixed; inset: 0; max-width: 440px; margin: 0 auto; background: rgba(0,0,0,0.4); display: flex; align-items: flex-end; z-index: 20; }
+  .picker-sheet { width: 100%; max-height: 78%; background: var(--surface); border-radius: 16px 16px 0 0; display: flex; flex-direction: column; }
+  .picker-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 8px; font-size: 15px; font-weight: 600; flex-shrink: 0; }
+  .picker-close { border: none; background: var(--surface-2); color: var(--text-secondary); width: 28px; height: 28px; border-radius: 99px; font-size: 15px; cursor: pointer; }
+  .picker-search-wrap { padding: 4px 16px 10px; flex-shrink: 0; }
+  .picker-search-wrap input { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--surface-2); font-size: 15px; }
+  .picker-list { overflow-y: auto; padding: 0 8px 16px; }
+  .picker-item { display: block; width: 100%; text-align: left; padding: 12px 10px; border: none; background: none; font-size: 14.5px; color: var(--text); cursor: pointer; border-radius: 8px; }
+  .picker-item:active, .picker-item.hover { background: var(--surface-2); }
+  .picker-empty { padding: 20px 10px; color: var(--text-muted); font-size: 13.5px; text-align: center; }
+
+  /* resumo da pontuação */
+  .resumo-pontuacao { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-radius: var(--radius); margin-bottom: 16px; }
+  .resumo-total { font-family: var(--mono); font-size: 26px; font-weight: 700; }
+  .resumo-total small { font-size: 12.5px; font-weight: 400; opacity: 0.75; }
+  .resumo-label { font-size: 13.5px; font-weight: 600; }
+  .resumo-ruim { background: var(--red-100); color: var(--red-700); }
+  .resumo-boa { background: var(--amber-100); color: var(--amber-700); }
+  .resumo-otima { background: var(--green-100); color: var(--green-700); }
+
+  /* calendario customizado */
+  .cal-nav { display: flex; align-items: center; justify-content: space-between; padding: 4px 16px 10px; }
+  .cal-nav button { border: none; background: var(--surface-2); width: 32px; height: 32px; border-radius: 99px; font-size: 16px; cursor: pointer; color: var(--text); }
+  .cal-nav span { font-size: 14.5px; font-weight: 600; }
+  .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 11.5px; color: var(--text-muted); padding: 0 12px; margin-bottom: 4px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; padding: 0 10px 16px; }
+  .cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border: none; background: none; border-radius: 99px; font-size: 14px; color: var(--text); cursor: pointer; }
+  .cal-day.today { box-shadow: inset 0 0 0 1px var(--accent-600); }
+  .cal-day.selected { background: var(--accent-600); color: #fff; }
+
+  /* seletor de horario customizado */
+  .time-cols { display: flex; gap: 8px; padding: 0 12px 12px; height: 220px; }
+  .time-col { flex: 1; overflow-y: auto; border-radius: 10px; background: var(--surface-2); }
+  .time-col button { display: block; width: 100%; padding: 9px; border: none; background: none; font-size: 15px; font-family: var(--mono); color: var(--text); cursor: pointer; text-align: center; }
+  .time-col button.selected { background: var(--accent-600); color: #fff; border-radius: 8px; }
+  .time-footer { padding: 4px 16px 16px; }
+
+  /* confirmacao e sucesso */
+  .confirm-overlay { position: fixed; inset: 0; max-width: 440px; margin: 0 auto; background: rgba(0,0,0,0.42); display: flex; align-items: center; justify-content: center; z-index: 30; padding: 24px; }
+  .confirm-card { background: var(--surface); border-radius: 16px; padding: 20px; max-width: 320px; width: 100%; text-align: center; }
+  .confirm-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+  .confirm-msg { font-size: 13.5px; color: var(--text-secondary); margin-bottom: 18px; }
+  .confirm-actions { display: flex; gap: 8px; }
+  .confirm-actions button { flex: 1; }
+
+  .success-overlay { position: fixed; inset: 0; max-width: 440px; margin: 0 auto; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 40; text-align: center; padding: 24px; }
+  .success-icon { width: 62px; height: 62px; border-radius: 99px; background: var(--green-100); color: var(--green-600); display: flex; align-items: center; justify-content: center; font-size: 30px; margin-bottom: 16px; animation: successPop 0.3s ease; }
+  @keyframes successPop { from { transform: scale(0.55); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .success-title { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+  .success-msg { font-size: 13.5px; color: var(--text-secondary); max-width: 280px; }
+
+  /* header e footer fixos */
+  .bar-brand { display: flex; align-items: center; gap: 8px; flex: 1; }
+  .bar-brand img { height: 20px; width: auto; }
+  .bar-brand span { font-size: 13.5px; color: var(--text-muted); }
+  .footer-bar { flex-shrink: 0; padding: 12px 16px 16px; background: var(--bg); }
+</style>
+</head>
+<body>
+<div id="shell">
+  <div class="bar" id="bar"></div>
+  <div id="content"></div>
+  <div class="footer-bar" id="footerBar"></div>
+  <div class="save-toast" id="toast">Salvo no dispositivo</div>
+</div>
+
+<script>
+
+(function () {
+  "use strict";
+
+  var LOGO_B64 = "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";
+
+  const MUNICIPIOS_POR_ESTADO = {"Goiás":["Abadia de Goiás","Abadiânia","Acreúna","Adelândia","Alexânia","Aloândia","Alto Horizonte","Alto Paraíso de Goiás","Alvorada do Norte","Amaralina","Americano do Brasil","Amorinópolis","Anhanguera","Anicuns","Anápolis","Aparecida de Goiânia","Aparecida do Rio Doce","Aporé","Aragarças","Aragoiânia","Araguapaz","Araçu","Arenópolis","Aruanã","Aurilândia","Avelinópolis","Baliza","Barro Alto","Bela Vista de Goiás","Bom Jardim de Goiás","Bom Jesus de Goiás","Bonfinópolis","Bonópolis","Brazabrantes","Britânia","Buriti Alegre","Buriti de Goiás","Buritinópolis","Cabeceiras","Cachoeira Alta","Cachoeira Dourada","Cachoeira de Goiás","Caiapônia","Caldas Novas","Caldazinha","Campestre de Goiás","Campinaçu","Campinorte","Campo Alegre de Goiás","Campo Limpo de Goiás","Campos Belos","Campos Verdes","Carmo do Rio Verde","Castelândia","Catalão","Caturaí","Cavalcante","Caçu","Ceres","Cezarina","Chapadão do Céu","Cidade Ocidental","Cocalzinho de Goiás","Colinas do Sul","Corumbaíba","Corumbá de Goiás","Cristalina","Cristianópolis","Crixás","Cromínia","Cumari","Córrego do Ouro","Damianópolis","Damolândia","Davinópolis","Diorama","Divinópolis de Goiás","Doverlândia","Edealina","Edéia","Estrela do Norte","Faina","Fazenda Nova","Firminópolis","Flores de Goiás","Formosa","Formoso","Gameleira de Goiás","Goiandira","Goianira","Goianápolis","Goianésia","Goiatuba","Goiás","Goiânia","Gouvelândia","Guapó","Guarani de Goiás","Guaraíta","Guarinos","Heitoraí","Hidrolina","Hidrolândia","Iaciara","Inaciolândia","Indiara","Inhumas","Ipameri","Ipiranga de Goiás","Iporá","Israelândia","Itaberaí","Itaguari","Itaguaru","Itajá","Itapaci","Itapirapuã","Itapuranga","Itarumã","Itauçu","Itumbiara","Ivolândia","Jandaia","Jaraguá","Jataí","Jaupaci","Jesúpolis","Joviânia","Jussara","Lagoa Santa","Leopoldo de Bulhões","Luziânia","Mairipotaba","Mambaí","Mara Rosa","Marzagão","Matrinchã","Maurilândia","Mimoso de Goiás","Minaçu","Mineiros","Moiporá","Monte Alegre de Goiás","Montes Claros de Goiás","Montividiu","Montividiu do Norte","Morrinhos","Morro Agudo de Goiás","Mossâmedes","Mozarlândia","Mundo Novo","Mutunópolis","Nazário","Nerópolis","Niquelândia","Nova América","Nova Aurora","Nova Crixás","Nova Glória","Nova Iguaçu de Goiás","Nova Roma","Nova Veneza","Novo Brasil","Novo Gama","Novo Planalto","Orizona","Ouro Verde de Goiás","Ouvidor","Padre Bernardo","Palestina de Goiás","Palmeiras de Goiás","Palmelo","Palminópolis","Panamá","Paranaiguara","Paraúna","Perolândia","Petrolina de Goiás","Pilar de Goiás","Piracanjuba","Piranhas","Pirenópolis","Pires do Rio","Planaltina","Pontalina","Porangatu","Porteirão","Portelândia","Posse","Professor Jamil","Quirinópolis","Rialma","Rianápolis","Rio Quente","Rio Verde","Rubiataba","Sanclerlândia","Santa Bárbara de Goiás","Santa Cruz de Goiás","Santa Fé de Goiás","Santa Helena de Goiás","Santa Isabel","Santa Rita do Araguaia","Santa Rita do Novo Destino","Santa Rosa de Goiás","Santa Tereza de Goiás","Santa Terezinha de Goiás","Santo Antônio da Barra","Santo Antônio de Goiás","Santo Antônio do Descoberto","Senador Canedo","Serranópolis","Silvânia","Simolândia","São Domingos","São Francisco de Goiás","São João d'Aliança","São João da Paraúna","São Luiz do Norte","São Luís de Montes Belos","São Miguel do Araguaia","São Miguel do Passa Quatro","São Patrício","São Simão","Sítio d'Abadia","Taquaral de Goiás","Teresina de Goiás","Terezópolis de Goiás","Trindade","Trombas","Três Ranchos","Turvelândia","Turvânia","Uirapuru","Uruana","Uruaçu","Urutaí","Valparaíso de Goiás","Varjão","Vianópolis","Vicentinópolis","Vila Boa","Vila Propício","Água Fria de Goiás","Água Limpa","Águas Lindas de Goiás"],"Minas Gerais":["Abadia dos Dourados","Abaeté","Abre Campo","Acaiaca","Aguanil","Aimorés","Aiuruoca","Alagoa","Albertina","Alfenas","Alfredo Vasconcelos","Almenara","Alpercata","Alpinópolis","Alterosa","Alto Caparaó","Alto Jequitibá","Alto Rio Doce","Alvarenga","Alvinópolis","Alvorada de Minas","Além Paraíba","Amparo do Serra","Andradas","Andrelândia","Angelândia","Antônio Carlos","Antônio Dias","Antônio Prado de Minas","Aracitaba","Araguari","Arantina","Araponga","Araporã","Arapuá","Araxá","Araçaí","Araçuaí","Araújos","Arceburgo","Arcos","Areado","Argirita","Aricanduva","Arinos","Astolfo Dutra","Ataléia","Augusto de Lima","Açucena","Baependi","Baldim","Bambuí","Bandeira","Bandeira do Sul","Barbacena","Barra Longa","Barroso","Barão de Cocais","Barão de Monte Alto","Bela Vista de Minas","Belmiro Braga","Belo Horizonte","Belo Oriente","Belo Vale","Berilo","Berizal","Bertópolis","Betim","Bias Fortes","Bicas","Biquinhas","Boa Esperança","Bocaina de Minas","Bocaiúva","Bom Despacho","Bom Jardim de Minas","Bom Jesus da Penha","Bom Jesus do Amparo","Bom Jesus do Galho","Bom Repouso","Bom Sucesso","Bonfim","Bonfinópolis de Minas","Bonito de Minas","Borda da Mata","Botelhos","Botumirim","Brasilândia de Minas","Brasília de Minas","Brazópolis","Braúnas","Brumadinho","Brás Pires","Bueno Brandão","Buenópolis","Bugre","Buritis","Buritizeiro","Cabeceira Grande","Cabo Verde","Cachoeira Dourada","Cachoeira da Prata","Cachoeira de Minas","Cachoeira de Pajeú","Caetanópolis","Caeté","Caiana","Cajuri","Caldas","Camacho","Camanducaia","Cambuquira","Cambuí","Campanha","Campanário","Campestre","Campina Verde","Campo Azul","Campo Belo","Campo Florido","Campo do Meio","Campos Altos","Campos Gerais","Cana Verde","Canaã","Candeias","Cantagalo","Canápolis","Caparaó","Capela Nova","Capelinha","Capetinga","Capim Branco","Capinópolis","Capitão Andrade","Capitão Enéas","Capitólio","Caputira","Caranaíba","Carandaí","Carangola","Caratinga","Caraí","Carbonita","Careaçu","Carlos Chagas","Carmo da Cachoeira","Carmo da Mata","Carmo de Minas","Carmo do Cajuru","Carmo do Paranaíba","Carmo do Rio Claro","Carmésia","Carmópolis de Minas","Carneirinho","Carrancas","Carvalhos","Carvalhópolis","Casa Grande","Cascalho Rico","Cataguases","Catas Altas","Catas Altas da Noruega","Catuji","Catuti","Caxambu","Cedro do Abaeté","Central de Minas","Centralina","Chalé","Chapada Gaúcha","Chapada do Norte","Chiador","Chácara","Cipotânea","Claraval","Claro dos Poções","Cláudio","Coimbra","Coluna","Comendador Gomes","Comercinho","Conceição da Aparecida","Conceição da Barra de Minas","Conceição das Alagoas","Conceição das Pedras","Conceição de Ipanema","Conceição do Mato Dentro","Conceição do Pará","Conceição do Rio Verde","Conceição dos Ouros","Confins","Congonhal","Congonhas","Congonhas do Norte","Conquista","Conselheiro Lafaiete","Conselheiro Pena","Consolação","Contagem","Coqueiral","Coração de Jesus","Cordisburgo","Cordislândia","Corinto","Coroaci","Coromandel","Coronel Fabriciano","Coronel Murta","Coronel Pacheco","Coronel Xavier Chaves","Couto de Magalhães de Minas","Cristais","Cristiano Otoni","Cristina","Cristália","Crisólita","Crucilândia","Cruzeiro da Fortaleza","Cruzília","Cuparaque","Curral de Dentro","Curvelo","Cássia","Córrego Danta","Córrego Fundo","Córrego Novo","Córrego do Bom Jesus","Cônego Marinho","Datas","Delfim Moreira","Delfinópolis","Delta","Descoberto","Desterro de Entre Rios","Desterro do Melo","Diamantina","Diogo de Vasconcelos","Dionísio","Divino","Divino das Laranjeiras","Divinolândia de Minas","Divinésia","Divinópolis","Divisa Alegre","Divisa Nova","Divisópolis","Dom Bosco","Dom Cavati","Dom Joaquim","Dom Silvério","Dom Viçoso","Dona Eusébia","Dores de Campos","Dores de Guanhães","Dores do Indaiá","Dores do Turvo","Doresópolis","Douradoquara","Durandé","Elói Mendes","Engenheiro Caldas","Engenheiro Navarro","Entre Folhas","Entre Rios de Minas","Ervália","Esmeraldas","Espera Feliz","Espinosa","Espírito Santo do Dourado","Estiva","Estrela Dalva","Estrela do Indaiá","Estrela do Sul","Eugenópolis","Ewbank da Câmara","Extrema","Fama","Faria Lemos","Felisburgo","Felixlândia","Felício dos Santos","Fernandes Tourinho","Ferros","Fervedouro","Florestal","Formiga","Formoso","Fortaleza de Minas","Fortuna de Minas","Francisco Badaró","Francisco Dumont","Francisco Sá","Franciscópolis","Frei Gaspar","Frei Inocêncio","Frei Lagonegro","Fronteira","Fronteira dos Vales","Fruta de Leite","Frutal","Funilândia","Galiléia","Gameleiras","Glaucilândia","Goiabeira","Goianá","Gonzaga","Gonçalves","Gouveia","Governador Valadares","Grupiara","Grão Mogol","Guanhães","Guapé","Guaraciaba","Guaraciama","Guarani","Guaranésia","Guarará","Guarda-Mor","Guaxupé","Guidoval","Guimarânia","Guiricema","Gurinhatã","Heliodora","Iapu","Ibertioga","Ibiaí","Ibiracatu","Ibiraci","Ibirité","Ibitiúra de Minas","Ibituruna","Ibiá","Icaraí de Minas","Igarapé","Igaratinga","Iguatama","Ijaci","Ilicínea","Imbé de Minas","Inconfidentes","Indaiabira","Indianópolis","Ingaí","Inhapim","Inhaúma","Inimutaba","Ipaba","Ipanema","Ipatinga","Ipiaçu","Ipuiúna","Iraí de Minas","Itabira","Itabirinha","Itabirito","Itacambira","Itacarambi","Itaguara","Itaipé","Itajubá","Itamarandiba","Itamarati de Minas","Itambacuri","Itambé do Mato Dentro","Itamogi","Itamonte","Itanhandu","Itanhomi","Itaobim","Itapagipe","Itapecerica","Itapeva","Itatiaiuçu","Itaverava","Itaú de Minas","Itaúna","Itinga","Itueta","Ituiutaba","Itumirim","Iturama","Itutinga","Jaboticatubas","Jacinto","Jacutinga","Jacuí","Jaguaraçu","Jampruca","Janaúba","Januária","Japaraíba","Japonvar","Jaíba","Jeceaba","Jenipapo de Minas","Jequeri","Jequitaí","Jequitibá","Jequitinhonha","Jesuânia","Joanésia","Joaquim Felício","Joaíma","Jordânia","Josenópolis","José Gonçalves de Minas","José Raydan","João Monlevade","João Pinheiro","Juatuba","Juiz de Fora","Juramento","Juruaia","Juvenília","Ladainha","Lagamar","Lagoa Dourada","Lagoa Formosa","Lagoa Grande","Lagoa Santa","Lagoa da Prata","Lagoa dos Patos","Lajinha","Lambari","Lamim","Laranjal","Lassance","Lavras","Leandro Ferreira","Leme do Prado","Leopoldina","Liberdade","Lima Duarte","Limeira do Oeste","Lontra","Luisburgo","Luislândia","Luminárias","Luz","Machacalis","Machado","Madre de Deus de Minas","Malacacheta","Mamonas","Manga","Manhuaçu","Manhumirim","Mantena","Mar de Espanha","Maravilhas","Maria da Fé","Mariana","Marilac","Maripá de Minas","Marliéria","Marmelópolis","Martinho Campos","Martins Soares","Mata Verde","Materlândia","Mateus Leme","Mathias Lobato","Matias Barbosa","Matias Cardoso","Matipó","Mato Verde","Matozinhos","Matutina","Medeiros","Medina","Mendes Pimentel","Mercês","Mesquita","Minas Novas","Minduri","Mirabela","Miradouro","Miravânia","Miraí","Moeda","Moema","Monjolos","Monsenhor Paulo","Montalvânia","Monte Alegre de Minas","Monte Azul","Monte Belo","Monte Carmelo","Monte Formoso","Monte Santo de Minas","Monte Sião","Montes Claros","Montezuma","Morada Nova de Minas","Morro da Garça","Morro do Pilar","Munhoz","Muriaé","Mutum","Muzambinho","Mário Campos","Nacip Raydan","Nanuque","Naque","Natalândia","Natércia","Nazareno","Nepomuceno","Ninheira","Nova Belém","Nova Era","Nova Lima","Nova Módica","Nova Ponte","Nova Porteirinha","Nova Resende","Nova Serrana","Nova União","Novo Cruzeiro","Novo Oriente de Minas","Novorizonte","Olaria","Olhos d'Água","Oliveira","Oliveira Fortes","Olímpio Noronha","Onça de Pitangui","Oratórios","Orizânia","Ouro Branco","Ouro Fino","Ouro Preto","Ouro Verde de Minas","Padre Carvalho","Padre Paraíso","Pai Pedro","Paineiras","Pains","Paiva","Palma","Palmópolis","Papagaios","Paracatu","Paraguaçu","Paraisópolis","Paraopeba","Pará de Minas","Passa Quatro","Passa Tempo","Passa-Vinte","Passabém","Passos","Patis","Patos de Minas","Patrocínio","Patrocínio do Muriaé","Paula Cândido","Paulistas","Pavão","Pedra Azul","Pedra Bonita","Pedra Dourada","Pedra do Anta","Pedra do Indaiá","Pedralva","Pedras de Maria da Cruz","Pedrinópolis","Pedro Leopoldo","Pedro Teixeira","Pequeri","Pequi","Perdigão","Perdizes","Perdões","Periquito","Pescador","Peçanha","Piau","Piedade de Caratinga","Piedade de Ponte Nova","Piedade do Rio Grande","Piedade dos Gerais","Pimenta","Pingo-d'Água","Pintópolis","Piracema","Pirajuba","Piranga","Piranguinho","Piranguçu","Pirapetinga","Pirapora","Piraúba","Pitangui","Piumhi","Planura","Pocrane","Pompéu","Ponte Nova","Ponto Chique","Ponto dos Volantes","Porteirinha","Porto Firme","Poté","Pouso Alegre","Pouso Alto","Poço Fundo","Poços de Caldas","Prados","Prata","Pratinha","Pratápolis","Presidente Bernardes","Presidente Juscelino","Presidente Kubitschek","Presidente Olegário","Prudente de Morais","Quartel Geral","Queluzito","Raposos","Raul Soares","Recreio","Reduto","Resende Costa","Resplendor","Ressaquinha","Riachinho","Riacho dos Machados","Ribeirão Vermelho","Ribeirão das Neves","Rio Acima","Rio Casca","Rio Doce","Rio Espera","Rio Manso","Rio Novo","Rio Paranaíba","Rio Pardo de Minas","Rio Piracicaba","Rio Pomba","Rio Preto","Rio Vermelho","Rio do Prado","Ritápolis","Rochedo de Minas","Rodeiro","Romaria","Rosário da Limeira","Rubelita","Rubim","Sabará","Sabinópolis","Sacramento","Salinas","Salto da Divisa","Santa Bárbara","Santa Bárbara do Leste","Santa Bárbara do Monte Verde","Santa Bárbara do Tugúrio","Santa Cruz de Minas","Santa Cruz de Salinas","Santa Cruz do Escalvado","Santa Efigênia de Minas","Santa Fé de Minas","Santa Helena de Minas","Santa Juliana","Santa Luzia","Santa Margarida","Santa Maria de Itabira","Santa Maria do Salto","Santa Maria do Suaçuí","Santa Rita de Caldas","Santa Rita de Ibitipoca","Santa Rita de Jacutinga","Santa Rita de Minas","Santa Rita do Itueto","Santa Rita do Sapucaí","Santa Rosa da Serra","Santa Vitória","Santana da Vargem","Santana de Cataguases","Santana de Pirapama","Santana do Deserto","Santana do Garambéu","Santana do Jacaré","Santana do Manhuaçu","Santana do Paraíso","Santana do Riacho","Santana dos Montes","Santo Antônio do Amparo","Santo Antônio do Aventureiro","Santo Antônio do Grama","Santo Antônio do Itambé","Santo Antônio do Jacinto","Santo Antônio do Monte","Santo Antônio do Retiro","Santo Antônio do Rio Abaixo","Santo Hipólito","Santos Dumont","Sapucaí-Mirim","Sardoá","Sarzedo","Sem-Peixe","Senador Amaral","Senador Cortes","Senador Firmino","Senador José Bento","Senador Modestino Gonçalves","Senhora de Oliveira","Senhora do Porto","Senhora dos Remédios","Sericita","Seritinga","Serra Azul de Minas","Serra da Saudade","Serra do Salitre","Serra dos Aimorés","Serrania","Serranos","Serranópolis de Minas","Serro","Sete Lagoas","Setubinha","Silveirânia","Silvianópolis","Simonésia","Simão Pereira","Sobrália","Soledade de Minas","São Bento Abade","São Brás do Suaçuí","São Domingos das Dores","São Domingos do Prata","São Francisco","São Francisco de Paula","São Francisco de Sales","São Francisco do Glória","São Félix de Minas","São Geraldo","São Geraldo da Piedade","São Geraldo do Baixio","São Gonçalo do Abaeté","São Gonçalo do Pará","São Gonçalo do Rio Abaixo","São Gonçalo do Rio Preto","São Gonçalo do Sapucaí","São Gotardo","São Joaquim de Bicas","São José da Barra","São José da Lapa","São José da Safira","São José da Varginha","São José do Alegre","São José do Divino","São José do Goiabal","São José do Jacuri","São José do Mantimento","São João Batista do Glória","São João Evangelista","São João Nepomuceno","São João da Lagoa","São João da Mata","São João da Ponte","São João das Missões","São João del Rei","São João do Manhuaçu","São João do Manteninha","São João do Oriente","São João do Pacuí","São João do Paraíso","São Lourenço","São Miguel do Anta","São Pedro da União","São Pedro do Suaçuí","São Pedro dos Ferros","São Romão","São Roque de Minas","São Sebastião da Bela Vista","São Sebastião da Vargem Alegre","São Sebastião do Anta","São Sebastião do Maranhão","São Sebastião do Oeste","São Sebastião do Paraíso","São Sebastião do Rio Preto","São Sebastião do Rio Verde","São Thomé das Letras","São Tiago","São Tomás de Aquino","São Vicente de Minas","Tabuleiro","Taiobeiras","Taparuba","Tapira","Tapiraí","Taquaraçu de Minas","Tarumirim","Teixeiras","Teófilo Otoni","Timóteo","Tiradentes","Tiros","Tocantins","Tocos do Moji","Toledo","Tombos","Três Corações","Três Marias","Três Pontas","Tumiritinga","Tupaciguara","Turmalina","Turvolândia","Ubaporanga","Ubaí","Uberaba","Uberlândia","Ubá","Umburatiba","Unaí","União de Minas","Uruana de Minas","Urucuia","Urucânia","Vargem Alegre","Vargem Bonita","Vargem Grande do Rio Pardo","Varginha","Varjão de Minas","Varzelândia","Vazante","Verdelândia","Veredinha","Vermelho Novo","Veríssimo","Vespasiano","Vieiras","Virgem da Lapa","Virginópolis","Virgolândia","Virgínia","Visconde do Rio Branco","Viçosa","Volta Grande","Várzea da Palma","Wenceslau Braz","Água Boa","Água Comprida","Águas Formosas","Águas Vermelhas"],"Pará":["Abaetetuba","Abel Figueiredo","Acará","Afuá","Alenquer","Almeirim","Altamira","Anajás","Ananindeua","Anapu","Augusto Corrêa","Aurora do Pará","Aveiro","Bagre","Baião","Bannach","Barcarena","Belterra","Belém","Benevides","Bom Jesus do Tocantins","Bonito","Bragança","Brasil Novo","Brejo Grande do Araguaia","Breu Branco","Breves","Bujaru","Cachoeira do Arari","Cachoeira do Piriá","Cametá","Canaã dos Carajás","Capanema","Capitão Poço","Castanhal","Chaves","Colares","Conceição do Araguaia","Concórdia do Pará","Cumaru do Norte","Curionópolis","Curralinho","Curuá","Curuçá","Dom Eliseu","Eldorado do Carajás","Faro","Floresta do Araguaia","Garrafão do Norte","Goianésia do Pará","Gurupá","Igarapé-Açu","Igarapé-Miri","Inhangapi","Ipixuna do Pará","Irituia","Itaituba","Itupiranga","Jacareacanga","Jacundá","Juruti","Limoeiro do Ajuru","Magalhães Barata","Marabá","Maracanã","Marapanim","Marituba","Medicilândia","Melgaço","Mocajuba","Moju","Mojuí dos Campos","Monte Alegre","Muaná","Mãe do Rio","Nova Esperança do Piriá","Nova Ipixuna","Nova Timboteua","Novo Progresso","Novo Repartimento","Oeiras do Pará","Oriximiná","Ourilândia do Norte","Ourém","Pacajá","Palestina do Pará","Paragominas","Parauapebas","Pau d'Arco","Peixe-Boi","Piçarra","Placas","Ponta de Pedras","Portel","Porto de Moz","Prainha","Primavera","Quatipuru","Redenção","Rio Maria","Rondon do Pará","Rurópolis","Salinópolis","Salvaterra","Santa Bárbara do Pará","Santa Cruz do Arari","Santa Izabel do Pará","Santa Luzia do Pará","Santa Maria das Barreiras","Santa Maria do Pará","Santana do Araguaia","Santarém","Santarém Novo","Santo Antônio do Tauá","Sapucaia","Senador José Porfírio","Soure","São Caetano de Odivelas","São Domingos do Araguaia","São Domingos do Capim","São Francisco do Pará","São Félix do Xingu","São Geraldo do Araguaia","São João da Ponta","São João de Pirabas","São João do Araguaia","São Miguel do Guamá","São Sebastião da Boa Vista","Tailândia","Terra Alta","Terra Santa","Tomé-Açu","Tracuateua","Trairão","Tucumã","Tucuruí","Ulianópolis","Uruará","Vigia","Viseu","Vitória do Xingu","Xinguara","Água Azul do Norte","Óbidos"],"Ceará":["Abaiara","Acarape","Acaraú","Acopiara","Aiuaba","Alcântaras","Altaneira","Alto Santo","Amontada","Antonina do Norte","Apuiarés","Aquiraz","Aracati","Aracoiaba","Ararendá","Araripe","Aratuba","Arneiroz","Assaré","Aurora","Baixio","Banabuiú","Barbalha","Barreira","Barro","Barroquinha","Baturité","Beberibe","Bela Cruz","Boa Viagem","Brejo Santo","Camocim","Campos Sales","Canindé","Capistrano","Caridade","Caririaçu","Cariré","Cariús","Carnaubal","Cascavel","Catarina","Catunda","Caucaia","Cedro","Chaval","Chorozinho","Choró","Coreaú","Crateús","Crato","Croatá","Cruz","Deputado Irapuan Pinheiro","Ererê","Eusébio","Farias Brito","Forquilha","Fortaleza","Fortim","Frecheirinha","General Sampaio","Granja","Granjeiro","Graça","Groaíras","Guaiúba","Guaraciaba do Norte","Guaramiranga","Hidrolândia","Horizonte","Ibaretama","Ibiapina","Ibicuitinga","Icapuí","Icó","Iguatu","Independência","Ipaporanga","Ipaumirim","Ipu","Ipueiras","Iracema","Irauçuba","Itaitinga","Itaiçaba","Itapajé","Itapipoca","Itapiúna","Itarema","Itatira","Jaguaretama","Jaguaribara","Jaguaribe","Jaguaruana","Jardim","Jati","Jijoca de Jericoacoara","Juazeiro do Norte","Jucás","Lavras da Mangabeira","Limoeiro do Norte","Madalena","Maracanaú","Maranguape","Marco","Martinópole","Massapê","Mauriti","Meruoca","Milagres","Milhã","Miraíma","Missão Velha","Mombaça","Monsenhor Tabosa","Morada Nova","Moraújo","Morrinhos","Mucambo","Mulungu","Nova Olinda","Nova Russas","Novo Oriente","Ocara","Orós","Pacajus","Pacatuba","Pacoti","Pacujá","Palhano","Palmácia","Paracuru","Paraipaba","Parambu","Paramoti","Pedra Branca","Penaforte","Pentecoste","Pereiro","Pindoretama","Piquet Carneiro","Pires Ferreira","Poranga","Porteiras","Potengi","Potiretama","Quiterianópolis","Quixadá","Quixelô","Quixeramobim","Quixeré","Redenção","Reriutaba","Russas","Saboeiro","Salitre","Santa Quitéria","Santana do Acaraú","Santana do Cariri","Senador Pompeu","Senador Sá","Sobral","Solonópole","São Benedito","São Gonçalo do Amarante","São João do Jaguaribe","São Luís do Curu","Tabuleiro do Norte","Tamboril","Tarrafas","Tauá","Tejuçuoca","Tianguá","Trairi","Tururu","Ubajara","Umari","Umirim","Uruburetama","Uruoca","Varjota","Viçosa do Ceará","Várzea Alegre"],"Bahia":["Abaré","Abaíra","Acajutiba","Adustina","Aiquara","Alagoinhas","Alcobaça","Almadina","Amargosa","Amélia Rodrigues","América Dourada","Anagé","Andaraí","Andorinha","Angical","Anguera","Antas","Antônio Cardoso","Antônio Gonçalves","Aporá","Apuarema","Aracatu","Araci","Aramari","Arataca","Aratuípe","Araças","Aurelino Leal","Baianópolis","Baixa Grande","Banzaê","Barra","Barra da Estiva","Barra do Choça","Barra do Mendes","Barra do Rocha","Barreiras","Barro Alto","Barro Preto","Barrocas","Belmonte","Belo Campo","Biritinga","Boa Nova","Boa Vista do Tupim","Bom Jesus da Lapa","Bom Jesus da Serra","Boninal","Bonito","Boquira","Botuporã","Brejolândia","Brejões","Brotas de Macaúbas","Brumado","Buerarema","Buritirama","Caatiba","Cabaceiras do Paraguaçu","Cachoeira","Caculé","Caetanos","Caetité","Cafarnaum","Cairu","Caldeirão Grande","Camacan","Camamu","Camaçari","Campo Alegre de Lourdes","Campo Formoso","Canarana","Canavieiras","Candeal","Candeias","Candiba","Cansanção","Canudos","Canápolis","Capela do Alto Alegre","Capim Grosso","Caravelas","Caraíbas","Cardeal da Silva","Carinhanha","Casa Nova","Castro Alves","Catolândia","Catu","Caturama","Caém","Central","Chorrochó","Cipó","Coaraci","Cocos","Conceição da Feira","Conceição do Almeida","Conceição do Coité","Conceição do Jacuípe","Conde","Condeúba","Contendas do Sincorá","Coração de Maria","Cordeiros","Coribe","Coronel João Sá","Correntina","Cotegipe","Cravolândia","Cristópolis","Crisópolis","Cruz das Almas","Curaçá","Cândido Sales","Cícero Dantas","Dias d'Ávila","Dom Basílio","Dom Macedo Costa","Dário Meira","Elísio Medrado","Encruzilhada","Entre Rios","Esplanada","Euclides da Cunha","Eunápolis","Feira da Mata","Feira de Santana","Filadélfia","Firmino Alves","Floresta Azul","Formosa do Rio Preto","Fátima","Gandu","Gavião","Gentio do Ouro","Glória","Gongogi","Governador Mangabeira","Guajeru","Guanambi","Guaratinga","Heliópolis","Iaçu","Ibiassucê","Ibicaraí","Ibicoara","Ibicuí","Ibipeba","Ibipitanga","Ibiquera","Ibirapitanga","Ibirapuã","Ibirataia","Ibitiara","Ibititá","Ibotirama","Ichu","Igaporã","Igrapiúna","Iguaí","Ilhéus","Inhambupe","Ipecaetá","Ipiaú","Ipirá","Ipupiara","Irajuba","Iramaia","Iraquara","Irará","Irecê","Itabela","Itaberaba","Itabuna","Itacaré","Itaeté","Itagi","Itagibá","Itagimirim","Itaguaçu da Bahia","Itaju do Colônia","Itajuípe","Itamaraju","Itamari","Itambé","Itanagra","Itanhém","Itaparica","Itapebi","Itapetinga","Itapicuru","Itapitanga","Itapé","Itaquara","Itarantim","Itatim","Itiruçu","Itiúba","Itororó","Ituaçu","Ituberá","Iuiú","Jaborandi","Jacaraci","Jacobina","Jaguaquara","Jaguarari","Jaguaripe","Jandaíra","Jequié","Jeremoabo","Jiquiriçá","Jitaúna","João Dourado","Juazeiro","Jucuruçu","Jussara","Jussari","Jussiape","Lafaiete Coutinho","Lagoa Real","Laje","Lajedinho","Lajedo do Tabocal","Lajedão","Lamarão","Lapão","Lauro de Freitas","Lençóis","Licínio de Almeida","Livramento de Nossa Senhora","Luís Eduardo Magalhães","Macajuba","Macarani","Macaúbas","Macururé","Madre de Deus","Maetinga","Maiquinique","Mairi","Malhada","Malhada de Pedras","Manoel Vitorino","Mansidão","Maracás","Maragogipe","Maraú","Marcionílio Souza","Mascote","Mata de São João","Matina","Medeiros Neto","Miguel Calmon","Milagres","Mirangaba","Mirante","Monte Santo","Morpará","Morro do Chapéu","Mortugaba","Mucugê","Mucuri","Mulungu do Morro","Mundo Novo","Muniz Ferreira","Muquém de São Francisco","Muritiba","Mutuípe","Nazaré","Nilo Peçanha","Nordestina","Nova Canaã","Nova Fátima","Nova Ibiá","Nova Itarana","Nova Redenção","Nova Soure","Nova Viçosa","Novo Horizonte","Novo Triunfo","Olindina","Oliveira dos Brejinhos","Ouriçangas","Ourolândia","Palmas de Monte Alto","Palmeiras","Paramirim","Paratinga","Paripiranga","Pau Brasil","Paulo Afonso","Pedro Alexandre","Pedrão","Piatã","Pilão Arcado","Pindaí","Pindobaçu","Pintadas","Piraí do Norte","Piripá","Piritiba","Planaltino","Planalto","Pojuca","Ponto Novo","Porto Seguro","Potiraguá","Poções","Prado","Presidente Dutra","Presidente Jânio Quadros","Presidente Tancredo Neves","Pé de Serra","Queimadas","Quijingue","Quixabeira","Rafael Jambeiro","Remanso","Retirolândia","Riacho de Santana","Riachão das Neves","Riachão do Jacuípe","Ribeira do Amparo","Ribeira do Pombal","Ribeirão do Largo","Rio Real","Rio de Contas","Rio do Antônio","Rio do Pires","Rodelas","Ruy Barbosa","Salinas da Margarida","Salvador","Santa Brígida","Santa Bárbara","Santa Cruz Cabrália","Santa Cruz da Vitória","Santa Inês","Santa Luzia","Santa Maria da Vitória","Santa Rita de Cássia","Santa Teresinha","Santaluz","Santana","Santanópolis","Santo Amaro","Santo Antônio de Jesus","Santo Estêvão","Sapeaçu","Saubara","Saúde","Seabra","Sebastião Laranjeiras","Senhor do Bonfim","Sento Sé","Serra Dourada","Serra Preta","Serra do Ramalho","Serrinha","Serrolândia","Simões Filho","Sobradinho","Souto Soares","Sátiro Dias","São Desidério","São Domingos","São Felipe","São Francisco do Conde","São Félix","São Félix do Coribe","São Gabriel","São Gonçalo dos Campos","São José da Vitória","São José do Jacuípe","São Miguel das Matas","São Sebastião do Passé","Sítio do Mato","Sítio do Quinto","Tabocas do Brejo Velho","Tanhaçu","Tanque Novo","Tanquinho","Taperoá","Tapiramutá","Teixeira de Freitas","Teodoro Sampaio","Teofilândia","Teolândia","Terra Nova","Tremedal","Tucano","Uauá","Ubaitaba","Ubatã","Ubaíra","Uibaí","Umburanas","Una","Urandi","Uruçuca","Utinga","Valente","Valença","Varzedo","Vera Cruz","Vereda","Vitória da Conquista","Várzea Nova","Várzea da Roça","Várzea do Poço","Wagner","Wanderley","Wenceslau Guimarães","Xique-Xique","Água Fria","Érico Cardoso"],"Paraná":["Abatiá","Adrianópolis","Agudos do Sul","Almirante Tamandaré","Altamira do Paraná","Alto Paraná","Alto Paraíso","Alto Piquiri","Altônia","Alvorada do Sul","Amaporã","Ampére","Anahy","Andirá","Antonina","Antônio Olinto","Apucarana","Arapongas","Arapoti","Arapuã","Araruna","Araucária","Ariranha do Ivaí","Assaí","Assis Chateaubriand","Astorga","Atalaia","Balsa Nova","Bandeirantes","Barbosa Ferraz","Barra do Jacaré","Barracão","Bela Vista da Caroba","Bela Vista do Paraíso","Bituruna","Boa Esperança","Boa Esperança do Iguaçu","Boa Ventura de São Roque","Boa Vista da Aparecida","Bocaiúva do Sul","Bom Jesus do Sul","Bom Sucesso","Bom Sucesso do Sul","Borrazópolis","Braganey","Brasilândia do Sul","Cafeara","Cafelândia","Cafezal do Sul","Califórnia","Cambará","Cambira","Cambé","Campina Grande do Sul","Campina da Lagoa","Campina do Simão","Campo Bonito","Campo Largo","Campo Magro","Campo Mourão","Campo do Tenente","Candói","Cantagalo","Capanema","Capitão Leônidas Marques","Carambeí","Carlópolis","Cascavel","Castro","Catanduvas","Centenário do Sul","Cerro Azul","Chopinzinho","Cianorte","Cidade Gaúcha","Clevelândia","Colombo","Colorado","Congonhinhas","Conselheiro Mairinck","Contenda","Corbélia","Cornélio Procópio","Coronel Domingos Soares","Coronel Vivida","Corumbataí do Sul","Cruz Machado","Cruzeiro do Iguaçu","Cruzeiro do Oeste","Cruzeiro do Sul","Cruzmaltina","Curitiba","Curiúva","Cândido de Abreu","Céu Azul","Diamante D'Oeste","Diamante do Norte","Diamante do Sul","Dois Vizinhos","Douradina","Doutor Camargo","Doutor Ulysses","Engenheiro Beltrão","Entre Rios do Oeste","Enéas Marques","Esperança Nova","Espigão Alto do Iguaçu","Farol","Faxinal","Fazenda Rio Grande","Fernandes Pinheiro","Figueira","Flor da Serra do Sul","Floraí","Floresta","Florestópolis","Flórida","Formosa do Oeste","Foz do Iguaçu","Foz do Jordão","Francisco Alves","Francisco Beltrão","Fênix","General Carneiro","Godoy Moreira","Goioerê","Goioxim","Grandes Rios","Guairaçá","Guamiranga","Guapirama","Guaporema","Guaraci","Guaraniaçu","Guarapuava","Guaraqueçaba","Guaratuba","Guaíra","Honório Serpa","Ibaiti","Ibema","Ibiporã","Icaraíma","Iguaraçu","Iguatu","Imbaú","Imbituva","Inajá","Indianópolis","Inácio Martins","Ipiranga","Iporã","Iracema do Oeste","Irati","Iretama","Itaguajé","Itaipulândia","Itambaracá","Itambé","Itapejara d'Oeste","Itaperuçu","Itaúna do Sul","Ivaiporã","Ivatuba","Ivaté","Ivaí","Jaboti","Jacarezinho","Jaguapitã","Jaguariaíva","Jandaia do Sul","Janiópolis","Japira","Japurá","Jardim Alegre","Jardim Olinda","Jataizinho","Jesuítas","Joaquim Távora","Jundiaí do Sul","Juranda","Jussara","Kaloré","Lapa","Laranjal","Laranjeiras do Sul","Leópolis","Lidianópolis","Lindoeste","Loanda","Lobato","Londrina","Luiziana","Lunardelli","Lupionópolis","Mallet","Mamborê","Mandaguari","Mandaguaçu","Mandirituba","Manfrinópolis","Mangueirinha","Manoel Ribas","Marechal Cândido Rondon","Maria Helena","Marialva","Marilena","Mariluz","Marilândia do Sul","Maringá","Maripá","Mariópolis","Marmeleiro","Marquinho","Marumbi","Matelândia","Matinhos","Mato Rico","Mauá da Serra","Medianeira","Mercedes","Mirador","Miraselva","Missal","Moreira Sales","Morretes","Munhoz de Melo","Nossa Senhora das Graças","Nova Aliança do Ivaí","Nova América da Colina","Nova Aurora","Nova Cantu","Nova Esperança","Nova Esperança do Sudoeste","Nova Fátima","Nova Laranjeiras","Nova Londrina","Nova Olímpia","Nova Prata do Iguaçu","Nova Santa Bárbara","Nova Santa Rosa","Nova Tebas","Novo Itacolomi","Ortigueira","Ourizona","Ouro Verde do Oeste","Paiçandu","Palmas","Palmeira","Palmital","Palotina","Paranacity","Paranaguá","Paranapoema","Paranavaí","Paraíso do Norte","Pato Bragado","Pato Branco","Paula Freitas","Paulo Frontin","Peabiru","Perobal","Pinhais","Pinhal de São Bento","Pinhalão","Pinhão","Piraquara","Piraí do Sul","Pitanga","Pitangueiras","Piên","Planaltina do Paraná","Planalto","Ponta Grossa","Pontal do Paraná","Porecatu","Porto Amazonas","Porto Barreiro","Porto Rico","Porto Vitória","Prado Ferreira","Pranchita","Presidente Castelo Branco","Primeiro de Maio","Prudentópolis","Pérola","Pérola d'Oeste","Quarto Centenário","Quatiguá","Quatro Barras","Quatro Pontes","Quedas do Iguaçu","Querência do Norte","Quinta do Sol","Quitandinha","Ramilândia","Rancho Alegre","Rancho Alegre D'Oeste","Realeza","Rebouças","Renascença","Reserva","Reserva do Iguaçu","Ribeirão Claro","Ribeirão do Pinhal","Rio Azul","Rio Bom","Rio Bonito do Iguaçu","Rio Branco do Ivaí","Rio Branco do Sul","Rio Negro","Rolândia","Roncador","Rondon","Rosário do Ivaí","Sabáudia","Salgado Filho","Salto do Itararé","Salto do Lontra","Santa Amélia","Santa Cecília do Pavão","Santa Cruz de Monte Castelo","Santa Fé","Santa Helena","Santa Inês","Santa Isabel do Ivaí","Santa Izabel do Oeste","Santa Lúcia","Santa Maria do Oeste","Santa Mariana","Santa Mônica","Santa Tereza do Oeste","Santa Terezinha de Itaipu","Santana do Itararé","Santo Antônio da Platina","Santo Antônio do Caiuá","Santo Antônio do Paraíso","Santo Antônio do Sudoeste","Santo Inácio","Sapopema","Sarandi","Saudade do Iguaçu","Sengés","Serranópolis do Iguaçu","Sertaneja","Sertanópolis","Siqueira Campos","Sulina","São Carlos do Ivaí","São Jerônimo da Serra","São Jorge d'Oeste","São Jorge do Ivaí","São Jorge do Patrocínio","São José da Boa Vista","São José das Palmeiras","São José dos Pinhais","São João","São João do Caiuá","São João do Ivaí","São João do Triunfo","São Manoel do Paraná","São Mateus do Sul","São Miguel do Iguaçu","São Pedro do Iguaçu","São Pedro do Ivaí","São Pedro do Paraná","São Sebastião da Amoreira","São Tomé","Tamarana","Tamboara","Tapejara","Tapira","Teixeira Soares","Telêmaco Borba","Terra Boa","Terra Rica","Terra Roxa","Tibagi","Tijucas do Sul","Toledo","Tomazina","Três Barras do Paraná","Tunas do Paraná","Tuneiras do Oeste","Tupãssi","Turvo","Ubiratã","Umuarama","Uniflor","União da Vitória","Uraí","Ventania","Vera Cruz do Oeste","Verê","Virmond","Vitorino","Wenceslau Braz","Xambrê","Ângulo"],"Santa Catarina":["Abdon Batista","Abelardo Luz","Agrolândia","Agronômica","Alfredo Wagner","Alto Bela Vista","Anchieta","Angelina","Anita Garibaldi","Anitápolis","Antônio Carlos","Apiúna","Arabutã","Araquari","Araranguá","Armazém","Arroio Trinta","Arvoredo","Ascurra","Atalanta","Aurora","Balneário Arroio do Silva","Balneário Barra do Sul","Balneário Camboriú","Balneário Gaivota","Balneário Piçarras","Balneário Rincão","Bandeirante","Barra Bonita","Barra Velha","Bela Vista do Toldo","Belmonte","Benedito Novo","Biguaçu","Blumenau","Bocaina do Sul","Bom Jardim da Serra","Bom Jesus","Bom Jesus do Oeste","Bom Retiro","Bombinhas","Botuverá","Braço do Norte","Braço do Trombudo","Brunópolis","Brusque","Caibi","Calmon","Camboriú","Campo Alegre","Campo Belo do Sul","Campo Erê","Campos Novos","Canelinha","Canoinhas","Capinzal","Capivari de Baixo","Capão Alto","Catanduvas","Caxambu do Sul","Caçador","Celso Ramos","Cerro Negro","Chapadão do Lageado","Chapecó","Cocal do Sul","Concórdia","Cordilheira Alta","Coronel Freitas","Coronel Martins","Correia Pinto","Corupá","Criciúma","Cunha Porã","Cunhataí","Curitibanos","Descanso","Dionísio Cerqueira","Dona Emma","Doutor Pedrinho","Entre Rios","Ermo","Erval Velho","Faxinal dos Guedes","Flor do Sertão","Florianópolis","Formosa do Sul","Forquilhinha","Fraiburgo","Frei Rogério","Galvão","Garopaba","Garuva","Gaspar","Governador Celso Ramos","Gravatal","Grão Pará","Guabiruba","Guaraciaba","Guaramirim","Guarujá do Sul","Guatambú","Herval d'Oeste","Ibiam","Ibicaré","Ibirama","Ilhota","Imaruí","Imbituba","Imbuia","Indaial","Iomerê","Ipira","Iporã do Oeste","Ipuaçu","Ipumirim","Iraceminha","Irani","Irati","Irineópolis","Itaiópolis","Itajaí","Itapema","Itapiranga","Itapoá","Ituporanga","Itá","Içara","Jaborá","Jacinto Machado","Jaguaruna","Jaraguá do Sul","Jardinópolis","Joaçaba","Joinville","José Boiteux","Jupiá","Lacerdópolis","Lages","Laguna","Lajeado Grande","Laurentino","Lauro Muller","Lebon Régis","Leoberto Leal","Lindóia do Sul","Lontras","Luiz Alves","Luzerna","Macieira","Mafra","Major Gercino","Major Vieira","Maracajá","Maravilha","Marema","Massaranduba","Matos Costa","Meleiro","Mirim Doce","Modelo","Mondaí","Monte Carlo","Monte Castelo","Morro Grande","Morro da Fumaça","Navegantes","Nova Erechim","Nova Itaberaba","Nova Trento","Nova Veneza","Novo Horizonte","Orleans","Otacílio Costa","Ouro","Ouro Verde","Paial","Painel","Palhoça","Palma Sola","Palmeira","Palmitos","Papanduva","Paraíso","Passo de Torres","Passos Maia","Paulo Lopes","Pedras Grandes","Penha","Peritiba","Pescaria Brava","Petrolândia","Pinhalzinho","Pinheiro Preto","Piratuba","Planalto Alegre","Pomerode","Ponte Alta","Ponte Alta do Norte","Ponte Serrada","Porto Belo","Porto União","Pouso Redondo","Praia Grande","Presidente Castello Branco","Presidente Getúlio","Presidente Nereu","Princesa","Quilombo","Rancho Queimado","Rio Fortuna","Rio Negrinho","Rio Rufino","Rio das Antas","Rio do Campo","Rio do Oeste","Rio do Sul","Rio dos Cedros","Riqueza","Rodeio","Romelândia","Salete","Saltinho","Salto Veloso","Sangão","Santa Cecília","Santa Helena","Santa Rosa de Lima","Santa Rosa do Sul","Santa Terezinha","Santa Terezinha do Progresso","Santiago do Sul","Santo Amaro da Imperatriz","Saudades","Schroeder","Seara","Serra Alta","Siderópolis","Sombrio","Sul Brasil","São Bento do Sul","São Bernardino","São Bonifácio","São Carlos","São Cristovão do Sul","São Domingos","São Francisco do Sul","São Joaquim","São José","São José do Cedro","São José do Cerrito","São João Batista","São João do Itaperiú","São João do Oeste","São João do Sul","São Lourenço do Oeste","São Ludgero","São Martinho","São Miguel da Boa Vista","São Miguel do Oeste","São Pedro de Alcântara","Taió","Tangará","Tigrinhos","Tijucas","Timbé do Sul","Timbó","Timbó Grande","Treviso","Treze Tílias","Treze de Maio","Trombudo Central","Três Barras","Tubarão","Tunápolis","Turvo","União do Oeste","Urubici","Urupema","Urussanga","Vargem","Vargem Bonita","Vargeão","Vidal Ramos","Videira","Vitor Meireles","Witmarsum","Xanxerê","Xavantina","Xaxim","Zortéa","Água Doce","Águas Frias","Águas Mornas","Águas de Chapecó"],"Pernambuco":["Abreu e Lima","Afogados da Ingazeira","Afrânio","Agrestina","Alagoinha","Aliança","Altinho","Amaraji","Angelim","Araripina","Araçoiaba","Arcoverde","Barra de Guabiraba","Barreiros","Belo Jardim","Belém de Maria","Belém do São Francisco","Betânia","Bezerros","Bodocó","Bom Conselho","Bom Jardim","Bonito","Brejinho","Brejo da Madre de Deus","Brejão","Buenos Aires","Buíque","Cabo de Santo Agostinho","Cabrobó","Cachoeirinha","Caetés","Calumbi","Calçado","Camaragibe","Camocim de São Félix","Camutanga","Canhotinho","Capoeiras","Carnaubeira da Penha","Carnaíba","Carpina","Caruaru","Casinhas","Catende","Cedro","Chã Grande","Chã de Alegria","Condado","Correntes","Cortês","Cumaru","Cupira","Custódia","Dormentes","Escada","Exu","Feira Nova","Fernando de Noronha","Ferreiros","Flores","Floresta","Frei Miguelinho","Gameleira","Garanhuns","Glória do Goitá","Goiana","Granito","Gravatá","Iati","Ibimirim","Ibirajuba","Igarassu","Iguaracy","Ilha de Itamaracá","Inajá","Ingazeira","Ipojuca","Ipubi","Itacuruba","Itambé","Itapetim","Itapissuma","Itaquitinga","Itaíba","Jaboatão dos Guararapes","Jaqueira","Jataúba","Jatobá","Joaquim Nabuco","João Alfredo","Jucati","Jupi","Jurema","Lagoa Grande","Lagoa de Itaenga","Lagoa do Carro","Lagoa do Ouro","Lagoa dos Gatos","Lajedo","Limoeiro","Macaparana","Machados","Manari","Maraial","Mirandiba","Moreilândia","Moreno","Nazaré da Mata","Olinda","Orobó","Orocó","Ouricuri","Palmares","Palmeirina","Panelas","Paranatama","Parnamirim","Passira","Paudalho","Paulista","Pedra","Pesqueira","Petrolina","Petrolândia","Pombos","Poção","Primavera","Quipapá","Quixaba","Recife","Riacho das Almas","Ribeirão","Rio Formoso","Sairé","Salgadinho","Salgueiro","Saloá","Sanharó","Santa Cruz","Santa Cruz da Baixa Verde","Santa Cruz do Capibaribe","Santa Filomena","Santa Maria da Boa Vista","Santa Maria do Cambucá","Santa Terezinha","Serra Talhada","Serrita","Sertânia","Sirinhaém","Solidão","Surubim","São Benedito do Sul","São Bento do Una","São Caetano","São Joaquim do Monte","São José da Coroa Grande","São José do Belmonte","São José do Egito","São João","São Lourenço da Mata","São Vicente Ferrer","Tabira","Tacaimbó","Tacaratu","Tamandaré","Taquaritinga do Norte","Terezinha","Terra Nova","Timbaúba","Toritama","Tracunhaém","Trindade","Triunfo","Tupanatinga","Tuparetama","Venturosa","Verdejante","Vertente do Lério","Vertentes","Vicência","Vitória de Santo Antão","Xexéu","Água Preta","Águas Belas"],"Tocantins":["Abreulândia","Aguiarnópolis","Aliança do Tocantins","Almas","Alvorada","Ananás","Angico","Aparecida do Rio Negro","Aragominas","Araguacema","Araguanã","Araguatins","Araguaçu","Araguaína","Arapoema","Arraias","Augustinópolis","Aurora do Tocantins","Axixá do Tocantins","Babaçulândia","Bandeirantes do Tocantins","Barra do Ouro","Barrolândia","Bernardo Sayão","Bom Jesus do Tocantins","Brasilândia do Tocantins","Brejinho de Nazaré","Buriti do Tocantins","Cachoeirinha","Campos Lindos","Cariri do Tocantins","Carmolândia","Carrasco Bonito","Caseara","Centenário","Chapada da Natividade","Chapada de Areia","Colinas do Tocantins","Colméia","Combinado","Conceição do Tocantins","Couto Magalhães","Cristalândia","Crixás do Tocantins","Darcinópolis","Dianópolis","Divinópolis do Tocantins","Dois Irmãos do Tocantins","Dueré","Esperantina","Figueirópolis","Filadélfia","Formoso do Araguaia","Fortaleza do Tabocão","Fátima","Goianorte","Goiatins","Guaraí","Gurupi","Ipueiras","Itacajá","Itaguatins","Itapiratins","Itaporã do Tocantins","Jaú do Tocantins","Juarina","Lagoa da Confusão","Lagoa do Tocantins","Lajeado","Lavandeira","Lizarda","Luzinópolis","Marianópolis do Tocantins","Mateiros","Maurilândia do Tocantins","Miracema do Tocantins","Miranorte","Monte Santo do Tocantins","Monte do Carmo","Muricilândia","Natividade","Nazaré","Nova Olinda","Nova Rosalândia","Novo Acordo","Novo Alegre","Novo Jardim","Oliveira de Fátima","Palmas","Palmeirante","Palmeiras do Tocantins","Palmeirópolis","Paranã","Paraíso do Tocantins","Pau D'Arco","Pedro Afonso","Peixe","Pequizeiro","Pindorama do Tocantins","Piraquê","Pium","Ponte Alta do Bom Jesus","Ponte Alta do Tocantins","Porto Alegre do Tocantins","Porto Nacional","Praia Norte","Presidente Kennedy","Pugmil","Recursolândia","Riachinho","Rio Sono","Rio da Conceição","Rio dos Bois","Sampaio","Sandolândia","Santa Fé do Araguaia","Santa Maria do Tocantins","Santa Rita do Tocantins","Santa Rosa do Tocantins","Santa Tereza do Tocantins","Santa Terezinha do Tocantins","Silvanópolis","Sucupira","São Bento do Tocantins","São Félix do Tocantins","São Miguel do Tocantins","São Salvador do Tocantins","São Sebastião do Tocantins","São Valério","Sítio Novo do Tocantins","Taguatinga","Taipas do Tocantins","Talismã","Tocantinópolis","Tocantínia","Tupirama","Tupiratins","Wanderlândia","Xambioá"],"Maranhão":["Afonso Cunha","Alcântara","Aldeias Altas","Altamira do Maranhão","Alto Alegre do Maranhão","Alto Alegre do Pindaré","Alto Parnaíba","Amapá do Maranhão","Amarante do Maranhão","Anajatuba","Anapurus","Apicum-Açu","Araguanã","Araioses","Arame","Arari","Axixá","Açailândia","Bacabal","Bacabeira","Bacuri","Bacurituba","Balsas","Barra do Corda","Barreirinhas","Barão de Grajaú","Bela Vista do Maranhão","Belágua","Benedito Leite","Bequimão","Bernardo do Mearim","Boa Vista do Gurupi","Bom Jardim","Bom Jesus das Selvas","Bom Lugar","Brejo","Brejo de Areia","Buriti","Buriti Bravo","Buriticupu","Buritirana","Cachoeira Grande","Cajapió","Cajari","Campestre do Maranhão","Cantanhede","Capinzal do Norte","Carolina","Carutapera","Caxias","Cedral","Central do Maranhão","Centro Novo do Maranhão","Centro do Guilherme","Chapadinha","Cidelândia","Codó","Coelho Neto","Colinas","Conceição do Lago-Açu","Coroatá","Cururupu","Cândido Mendes","Davinópolis","Dom Pedro","Duque Bacelar","Esperantinópolis","Estreito","Feira Nova do Maranhão","Fernando Falcão","Formosa da Serra Negra","Fortaleza dos Nogueiras","Fortuna","Godofredo Viana","Gonçalves Dias","Governador Archer","Governador Edison Lobão","Governador Eugênio Barros","Governador Luiz Rocha","Governador Newton Bello","Governador Nunes Freire","Grajaú","Graça Aranha","Guimarães","Humberto de Campos","Icatu","Igarapé Grande","Igarapé do Meio","Imperatriz","Itaipava do Grajaú","Itapecuru Mirim","Itinga do Maranhão","Jatobá","Jenipapo dos Vieiras","Joselândia","João Lisboa","Junco do Maranhão","Lago Verde","Lago da Pedra","Lago do Junco","Lago dos Rodrigues","Lagoa Grande do Maranhão","Lagoa do Mato","Lajeado Novo","Lima Campos","Loreto","Luís Domingues","Magalhães de Almeida","Maracaçumé","Marajá do Sena","Maranhãozinho","Mata Roma","Matinha","Matões","Matões do Norte","Milagres do Maranhão","Mirador","Miranda do Norte","Mirinzal","Montes Altos","Monção","Morros","Nina Rodrigues","Nova Colinas","Nova Iorque","Nova Olinda do Maranhão","Olho d'Água das Cunhãs","Olinda Nova do Maranhão","Palmeirândia","Paraibano","Parnarama","Passagem Franca","Pastos Bons","Paulino Neves","Paulo Ramos","Paço do Lumiar","Pedreiras","Pedro do Rosário","Penalva","Peri Mirim","Peritoró","Pindaré-Mirim","Pinheiro","Pio XII","Pirapemas","Porto Franco","Porto Rico do Maranhão","Poção de Pedras","Presidente Dutra","Presidente Juscelino","Presidente Médici","Presidente Sarney","Presidente Vargas","Primeira Cruz","Raposa","Riachão","Ribamar Fiquene","Rosário","Sambaíba","Santa Filomena do Maranhão","Santa Helena","Santa Inês","Santa Luzia","Santa Luzia do Paruá","Santa Quitéria do Maranhão","Santa Rita","Santana do Maranhão","Santo Amaro do Maranhão","Santo Antônio dos Lopes","Satubinha","Senador Alexandre Costa","Senador La Rocque","Serrano do Maranhão","Sucupira do Norte","Sucupira do Riachão","São Benedito do Rio Preto","São Bento","São Bernardo","São Domingos do Azeitão","São Domingos do Maranhão","São Francisco do Brejão","São Francisco do Maranhão","São Félix de Balsas","São José de Ribamar","São José dos Basílios","São João Batista","São João do Carú","São João do Paraíso","São João do Soter","São João dos Patos","São Luís","São Luís Gonzaga do Maranhão","São Mateus do Maranhão","São Pedro da Água Branca","São Pedro dos Crentes","São Raimundo das Mangabeiras","São Raimundo do Doca Bezerra","São Roberto","São Vicente Ferrer","Sítio Novo","Tasso Fragoso","Timbiras","Timon","Trizidela do Vale","Tufilândia","Tuntum","Turiaçu","Turilândia","Tutóia","Urbano Santos","Vargem Grande","Viana","Vila Nova dos Martírios","Vitorino Freire","Vitória do Mearim","Zé Doca","Água Doce do Maranhão"],"Rio Grande do Norte":["Acari","Afonso Bezerra","Alexandria","Almino Afonso","Alto do Rodrigues","Angicos","Antônio Martins","Apodi","Areia Branca","Arês","Augusto Severo (Campo Grande)","Açu","Baraúna","Barcelona","Baía Formosa","Bento Fernandes","Bodó","Bom Jesus","Brejinho","Caicó","Caiçara do Norte","Caiçara do Rio do Vento","Campo Redondo","Canguaretama","Caraúbas","Carnaubais","Carnaúba dos Dantas","Ceará-Mirim","Cerro Corá","Coronel Ezequiel","Coronel João Pessoa","Cruzeta","Currais Novos","Doutor Severiano","Encanto","Equador","Espírito Santo","Extremoz","Felipe Guerra","Fernando Pedroza","Florânia","Francisco Dantas","Frutuoso Gomes","Galinhos","Goianinha","Governador Dix-Sept Rosado","Grossos","Guamaré","Ielmo Marinho","Ipanguaçu","Ipueira","Itajá","Itaú","Jandaíra","Janduís","Januário Cicco (Boa Saúde)","Japi","Jardim de Angicos","Jardim de Piranhas","Jardim do Seridó","Jaçanã","José da Penha","João Câmara","João Dias","Jucurutu","Jundiá","Lagoa Nova","Lagoa Salgada","Lagoa d'Anta","Lagoa de Pedras","Lagoa de Velhos","Lajes","Lajes Pintadas","Lucrécia","Luís Gomes","Macau","Macaíba","Major Sales","Marcelino Vieira","Martins","Maxaranguape","Messias Targino","Montanhas","Monte Alegre","Monte das Gameleiras","Mossoró","Natal","Nova Cruz","Nísia Floresta","Olho-d'Água do Borges","Ouro Branco","Paraná","Parazinho","Paraú","Parelhas","Parnamirim","Passa e Fica","Passagem","Patu","Pau dos Ferros","Pedra Grande","Pedra Preta","Pedro Avelino","Pedro Velho","Pendências","Pilões","Portalegre","Porto do Mangue","Poço Branco","Pureza","Rafael Fernandes","Rafael Godeiro","Riacho da Cruz","Riacho de Santana","Riachuelo","Rio do Fogo","Rodolfo Fernandes","Ruy Barbosa","Santa Cruz","Santa Maria","Santana do Matos","Santana do Seridó","Santo Antônio","Senador Elói de Souza","Senador Georgino Avelino","Serra Caiada","Serra Negra do Norte","Serra de São Bento","Serra do Mel","Serrinha","Serrinha dos Pintos","Severiano Melo","São Bento do Norte","São Bento do Trairí","São Fernando","São Francisco do Oeste","São Gonçalo do Amarante","São José de Mipibu","São José do Campestre","São José do Seridó","São João do Sabugi","São Miguel","São Miguel do Gostoso","São Paulo do Potengi","São Pedro","São Rafael","São Tomé","São Vicente","Sítio Novo","Taboleiro Grande","Taipu","Tangará","Tenente Ananias","Tenente Laurentino Cruz","Tibau","Tibau do Sul","Timbaúba dos Batistas","Touros","Triunfo Potiguar","Umarizal","Upanema","Venha-Ver","Vera Cruz","Vila Flor","Viçosa","Várzea","Água Nova"],"Piauí":["Acauã","Agricolândia","Alagoinha do Piauí","Alegrete do Piauí","Alto Longá","Altos","Alvorada do Gurguéia","Amarante","Angical do Piauí","Antônio Almeida","Anísio de Abreu","Aroazes","Aroeiras do Itaim","Arraial","Assunção do Piauí","Avelino Lopes","Baixa Grande do Ribeiro","Barra D'Alcântara","Barras","Barreiras do Piauí","Barro Duro","Batalha","Bela Vista do Piauí","Belém do Piauí","Beneditinos","Bertolínia","Betânia do Piauí","Boa Hora","Bocaina","Bom Jesus","Bom Princípio do Piauí","Bonfim do Piauí","Boqueirão do Piauí","Brasileira","Brejo do Piauí","Buriti dos Lopes","Buriti dos Montes","Cabeceiras do Piauí","Cajazeiras do Piauí","Cajueiro da Praia","Caldeirão Grande do Piauí","Campinas do Piauí","Campo Alegre do Fidalgo","Campo Grande do Piauí","Campo Largo do Piauí","Campo Maior","Canavieira","Canto do Buriti","Capitão Gervásio Oliveira","Capitão de Campos","Caracol","Caraúbas do Piauí","Caridade do Piauí","Castelo do Piauí","Caxingó","Cocal","Cocal de Telha","Cocal dos Alves","Coivaras","Colônia do Gurguéia","Colônia do Piauí","Conceição do Canindé","Coronel José Dias","Corrente","Cristalândia do Piauí","Cristino Castro","Curimatá","Currais","Curral Novo do Piauí","Curralinhos","Demerval Lobão","Dirceu Arcoverde","Dom Expedito Lopes","Dom Inocêncio","Domingos Mourão","Elesbão Veloso","Eliseu Martins","Esperantina","Fartura do Piauí","Flores do Piauí","Floresta do Piauí","Floriano","Francinópolis","Francisco Ayres","Francisco Macedo","Francisco Santos","Fronteiras","Geminiano","Gilbués","Guadalupe","Guaribas","Hugo Napoleão","Ilha Grande","Inhuma","Ipiranga do Piauí","Isaías Coelho","Itainópolis","Itaueira","Jacobina do Piauí","Jaicós","Jardim do Mulato","Jatobá do Piauí","Jerumenha","Joaquim Pires","Joca Marques","José de Freitas","João Costa","Juazeiro do Piauí","Jurema","Júlio Borges","Lagoa Alegre","Lagoa de São Francisco","Lagoa do Barro do Piauí","Lagoa do Piauí","Lagoa do Sítio","Lagoinha do Piauí","Landri Sales","Luzilândia","Luís Correia","Madeiro","Manoel Emídio","Marcolândia","Marcos Parente","Massapê do Piauí","Matias Olímpio","Miguel Alves","Miguel Leão","Milton Brandão","Monsenhor Gil","Monsenhor Hipólito","Monte Alegre do Piauí","Morro Cabeça no Tempo","Morro do Chapéu do Piauí","Murici dos Portelas","Nazaré do Piauí","Nazária","Nossa Senhora de Nazaré","Nossa Senhora dos Remédios","Nova Santa Rita","Novo Oriente do Piauí","Novo Santo Antônio","Oeiras","Olho D'Água do Piauí","Padre Marcos","Paes Landim","Pajeú do Piauí","Palmeira do Piauí","Palmeirais","Paquetá","Parnaguá","Parnaíba","Passagem Franca do Piauí","Patos do Piauí","Pau D'Arco do Piauí","Paulistana","Pavussu","Pedro II","Pedro Laurentino","Picos","Pimenteiras","Pio IX","Piracuruca","Piripiri","Porto","Porto Alegre do Piauí","Prata do Piauí","Queimada Nova","Redenção do Gurguéia","Regeneração","Riacho Frio","Ribeira do Piauí","Ribeiro Gonçalves","Rio Grande do Piauí","Santa Cruz do Piauí","Santa Cruz dos Milagres","Santa Filomena","Santa Luz","Santa Rosa do Piauí","Santana do Piauí","Santo Antônio de Lisboa","Santo Antônio dos Milagres","Santo Inácio do Piauí","Sebastião Barros","Sebastião Leal","Sigefredo Pacheco","Simplício Mendes","Simões","Socorro do Piauí","Sussuapara","São Braz do Piauí","São Francisco de Assis do Piauí","São Francisco do Piauí","São Félix do Piauí","São Gonçalo do Gurguéia","São Gonçalo do Piauí","São José do Divino","São José do Peixe","São José do Piauí","São João da Canabrava","São João da Fronteira","São João da Serra","São João da Varjota","São João do Arraial","São João do Piauí","São Julião","São Lourenço do Piauí","São Luis do Piauí","São Miguel da Baixa Grande","São Miguel do Fidalgo","São Miguel do Tapuio","São Pedro do Piauí","São Raimundo Nonato","Tamboril do Piauí","Tanque do Piauí","Teresina","União","Uruçuí","Valença do Piauí","Vera Mendes","Vila Nova do Piauí","Várzea Branca","Várzea Grande","Wall Ferraz","Água Branca"],"Rio Grande do Sul":["Aceguá","Agudo","Ajuricaba","Alecrim","Alegrete","Alegria","Almirante Tamandaré do Sul","Alpestre","Alto Alegre","Alto Feliz","Alvorada","Amaral Ferrador","Ametista do Sul","André da Rocha","Anta Gorda","Antônio Prado","Arambaré","Araricá","Aratiba","Arroio Grande","Arroio do Meio","Arroio do Padre","Arroio do Sal","Arroio do Tigre","Arroio dos Ratos","Arvorezinha","Augusto Pestana","Bagé","Balneário Pinhal","Barra Funda","Barra do Guarita","Barra do Quaraí","Barra do Ribeiro","Barra do Rio Azul","Barracão","Barros Cassal","Barão","Barão de Cotegipe","Barão do Triunfo","Benjamin Constant do Sul","Bento Gonçalves","Boa Vista das Missões","Boa Vista do Buricá","Boa Vista do Cadeado","Boa Vista do Incra","Boa Vista do Sul","Bom Jesus","Bom Princípio","Bom Progresso","Bom Retiro do Sul","Boqueirão do Leão","Bossoroca","Bozano","Braga","Brochier","Butiá","Cacequi","Cachoeira do Sul","Cachoeirinha","Cacique Doble","Caibaté","Caiçara","Camaquã","Camargo","Cambará do Sul","Campestre da Serra","Campina das Missões","Campinas do Sul","Campo Bom","Campo Novo","Campos Borges","Candelária","Candiota","Canela","Canguçu","Canoas","Canudos do Vale","Capela de Santana","Capitão","Capivari do Sul","Capão Bonito do Sul","Capão da Canoa","Capão do Cipó","Capão do Leão","Carazinho","Caraá","Carlos Barbosa","Carlos Gomes","Casca","Caseiros","Catuípe","Caxias do Sul","Caçapava do Sul","Centenário","Cerrito","Cerro Branco","Cerro Grande","Cerro Grande do Sul","Cerro Largo","Chapada","Charqueadas","Charrua","Chiapetta","Chuvisca","Chuí","Cidreira","Ciríaco","Colinas","Colorado","Condor","Constantina","Coqueiro Baixo","Coqueiros do Sul","Coronel Barros","Coronel Bicaco","Coronel Pilar","Cotiporã","Coxilha","Crissiumal","Cristal","Cristal do Sul","Cruz Alta","Cruzaltense","Cruzeiro do Sul","Cândido Godói","David Canabarro","Derrubadas","Dezesseis de Novembro","Dilermando de Aguiar","Dois Irmãos","Dois Irmãos das Missões","Dois Lajeados","Dom Feliciano","Dom Pedrito","Dom Pedro de Alcântara","Dona Francisca","Doutor Maurício Cardoso","Doutor Ricardo","Eldorado do Sul","Encantado","Encruzilhada do Sul","Engenho Velho","Entre Rios do Sul","Entre-Ijuís","Erebango","Erechim","Ernestina","Erval Grande","Erval Seco","Esmeralda","Esperança do Sul","Espumoso","Estação","Esteio","Estrela","Estrela Velha","Estância Velha","Eugênio de Castro","Fagundes Varela","Farroupilha","Faxinal do Soturno","Faxinalzinho","Fazenda Vilanova","Feliz","Flores da Cunha","Floriano Peixoto","Fontoura Xavier","Formigueiro","Forquetinha","Fortaleza dos Valos","Frederico Westphalen","Garibaldi","Garruchos","Gaurama","General Câmara","Gentil","Getúlio Vargas","Giruá","Glorinha","Gramado","Gramado Xavier","Gramado dos Loureiros","Gravataí","Guabiju","Guaporé","Guarani das Missões","Guaíba","Harmonia","Herval","Herveiras","Horizontina","Hulha Negra","Humaitá","Ibarama","Ibiaçá","Ibiraiaras","Ibirapuitã","Ibirubá","Igrejinha","Ijuí","Ilópolis","Imbé","Imigrante","Independência","Inhacorá","Ipiranga do Sul","Ipê","Iraí","Itaara","Itacurubi","Itapuca","Itaqui","Itati","Itatiba do Sul","Ivorá","Ivoti","Jaboticaba","Jacuizinho","Jacutinga","Jaguari","Jaguarão","Jaquirana","Jari","Jóia","Júlio de Castilhos","Lagoa Bonita do Sul","Lagoa Vermelha","Lagoa dos Três Cantos","Lagoão","Lajeado","Lajeado do Bugre","Lavras do Sul","Liberato Salzano","Lindolfo Collor","Linha Nova","Machadinho","Mampituba","Manoel Viana","Maquiné","Maratá","Marau","Marcelino Ramos","Mariana Pimentel","Mariano Moro","Marques de Souza","Mata","Mato Castelhano","Mato Leitão","Mato Queimado","Maximiliano de Almeida","Maçambará","Minas do Leão","Miraguaí","Montauri","Monte Alegre dos Campos","Monte Belo do Sul","Montenegro","Mormaço","Morrinhos do Sul","Morro Redondo","Morro Reuter","Mostardas","Muitos Capões","Muliterno","Muçum","Nicolau Vergueiro","Nonoai","Nova Alvorada","Nova Araçá","Nova Bassano","Nova Boa Vista","Nova Bréscia","Nova Candelária","Nova Esperança do Sul","Nova Hartz","Nova Palma","Nova Petrópolis","Nova Prata","Nova Pádua","Nova Ramada","Nova Roma do Sul","Nova Santa Rita","Novo Barreiro","Novo Cabrais","Novo Hamburgo","Novo Machado","Novo Tiradentes","Novo Xingu","Não-Me-Toque","Osório","Paim Filho","Palmares do Sul","Palmeira das Missões","Palmitinho","Panambi","Pantano Grande","Paraí","Paraíso do Sul","Pareci Novo","Parobé","Passa Sete","Passo Fundo","Passo do Sobrado","Paulo Bento","Paverama","Pedras Altas","Pedro Osório","Pejuçara","Pelotas","Picada Café","Pinhal","Pinhal Grande","Pinhal da Serra","Pinheirinho do Vale","Pinheiro Machado","Pinto Bandeira","Pirapó","Piratini","Planalto","Ponte Preta","Pontão","Porto Alegre","Porto Lucena","Porto Mauá","Porto Vera Cruz","Porto Xavier","Portão","Pouso Novo","Poço das Antas","Presidente Lucena","Progresso","Protásio Alves","Putinga","Quaraí","Quatro Irmãos","Quevedos","Quinze de Novembro","Redentora","Relvado","Restinga Sêca","Rio Grande","Rio Pardo","Rio dos Índios","Riozinho","Roca Sales","Rodeio Bonito","Rolador","Rolante","Ronda Alta","Rondinha","Roque Gonzales","Rosário do Sul","Sagrada Família","Saldanha Marinho","Salto do Jacuí","Salvador das Missões","Salvador do Sul","Sananduva","Sant'Ana do Livramento","Santa Bárbara do Sul","Santa Cecília do Sul","Santa Clara do Sul","Santa Cruz do Sul","Santa Margarida do Sul","Santa Maria","Santa Maria do Herval","Santa Rosa","Santa Tereza","Santa Vitória do Palmar","Santana da Boa Vista","Santiago","Santo Antônio da Patrulha","Santo Antônio das Missões","Santo Antônio do Palma","Santo Antônio do Planalto","Santo Augusto","Santo Cristo","Santo Expedito do Sul","Santo Ângelo","Sapiranga","Sapucaia do Sul","Sarandi","Seberi","Sede Nova","Segredo","Selbach","Senador Salgado Filho","Sentinela do Sul","Serafina Corrêa","Sertão","Sertão Santana","Sete de Setembro","Severiano de Almeida","Silveira Martins","Sinimbu","Sobradinho","Soledade","São Borja","São Domingos do Sul","São Francisco de Assis","São Francisco de Paula","São Gabriel","São Jerônimo","São Jorge","São José das Missões","São José do Herval","São José do Hortêncio","São José do Inhacorá","São José do Norte","São José do Ouro","São José do Sul","São José dos Ausentes","São João da Urtiga","São João do Polêsine","São Leopoldo","São Lourenço do Sul","São Luiz Gonzaga","São Marcos","São Martinho","São Martinho da Serra","São Miguel das Missões","São Nicolau","São Paulo das Missões","São Pedro da Serra","São Pedro das Missões","São Pedro do Butiá","São Pedro do Sul","São Sebastião do Caí","São Sepé","São Valentim","São Valentim do Sul","São Valério do Sul","São Vendelino","São Vicente do Sul","Sério","Tabaí","Tapejara","Tapera","Tapes","Taquara","Taquari","Taquaruçu do Sul","Tavares","Tenente Portela","Terra de Areia","Teutônia","Tio Hugo","Tiradentes do Sul","Toropi","Torres","Tramandaí","Travesseiro","Trindade do Sul","Triunfo","Três Arroios","Três Cachoeiras","Três Coroas","Três Forquilhas","Três Palmeiras","Três Passos","Três de Maio","Tucunduva","Tunas","Tupanci do Sul","Tupanciretã","Tupandi","Tuparendi","Turuçu","Ubiretama","Unistalda","União da Serra","Uruguaiana","Vacaria","Vale Real","Vale Verde","Vale do Sol","Vanini","Venâncio Aires","Vera Cruz","Veranópolis","Vespasiano Corrêa","Viadutos","Viamão","Vicente Dutra","Victor Graeff","Vila Flores","Vila Lângaro","Vila Maria","Vila Nova do Sul","Vista Alegre","Vista Alegre do Prata","Vista Gaúcha","Vitória das Missões","Westfália","Xangri-lá","Água Santa","Áurea"],"Mato Grosso":["Acorizal","Alta Floresta","Alto Araguaia","Alto Boa Vista","Alto Garças","Alto Paraguai","Alto Taquari","Apiacás","Araguaiana","Araguainha","Araputanga","Arenápolis","Aripuanã","Barra do Bugres","Barra do Garças","Barão de Melgaço","Boa Esperança do Norte","Bom Jesus do Araguaia","Brasnorte","Campinápolis","Campo Novo do Parecis","Campo Verde","Campos de Júlio","Canabrava do Norte","Canarana","Carlinda","Castanheira","Chapada dos Guimarães","Cláudia","Cocalinho","Colniza","Colíder","Comodoro","Confresa","Conquista D'Oeste","Cotriguaçu","Cuiabá","Curvelândia","Cáceres","Denise","Diamantino","Dom Aquino","Feliz Natal","Figueirópolis D'Oeste","Gaúcha do Norte","General Carneiro","Glória D'Oeste","Guarantã do Norte","Guiratinga","Indiavaí","Ipiranga do Norte","Itanhangá","Itaúba","Itiquira","Jaciara","Jangada","Jauru","Juara","Juruena","Juscimeira","Juína","Lambari D'Oeste","Lucas do Rio Verde","Luciara","Marcelândia","Matupá","Mirassol d'Oeste","Nobres","Nortelândia","Nossa Senhora do Livramento","Nova Bandeirantes","Nova Brasilândia","Nova Canaã do Norte","Nova Guarita","Nova Lacerda","Nova Marilândia","Nova Maringá","Nova Monte Verde","Nova Mutum","Nova Nazaré","Nova Olímpia","Nova Santa Helena","Nova Ubiratã","Nova Xavantina","Novo Horizonte do Norte","Novo Mundo","Novo Santo Antônio","Novo São Joaquim","Paranatinga","Paranaíta","Pedra Preta","Peixoto de Azevedo","Planalto da Serra","Poconé","Pontal do Araguaia","Ponte Branca","Pontes e Lacerda","Porto Alegre do Norte","Porto Esperidião","Porto Estrela","Porto dos Gaúchos","Poxoréu","Primavera do Leste","Querência","Reserva do Cabaçal","Ribeirão Cascalheira","Ribeirãozinho","Rio Branco","Rondolândia","Rondonópolis","Rosário Oeste","Salto do Céu","Santa Carmem","Santa Cruz do Xingu","Santa Rita do Trivelato","Santa Terezinha","Santo Afonso","Santo Antônio do Leste","Santo Antônio do Leverger","Sapezal","Serra Nova Dourada","Sinop","Sorriso","São Félix do Araguaia","São José do Povo","São José do Rio Claro","São José do Xingu","São José dos Quatro Marcos","São Pedro da Cipa","Tabaporã","Tangará da Serra","Tapurah","Terra Nova do Norte","Tesouro","Torixoréu","União do Sul","Vale de São Domingos","Vera","Vila Bela da Santíssima Trindade","Vila Rica","Várzea Grande","Água Boa"],"Acre":["Acrelândia","Assis Brasil","Brasiléia","Bujari","Capixaba","Cruzeiro do Sul","Epitaciolândia","Feijó","Jordão","Manoel Urbano","Marechal Thaumaturgo","Mâncio Lima","Plácido de Castro","Porto Acre","Porto Walter","Rio Branco","Rodrigues Alves","Santa Rosa do Purus","Sena Madureira","Senador Guiomard","Tarauacá","Xapuri"],"São Paulo":["Adamantina","Adolfo","Aguaí","Agudos","Alambari","Alfredo Marcondes","Altair","Altinópolis","Alto Alegre","Alumínio","Alvinlândia","Americana","Amparo","Américo Brasiliense","Américo de Campos","Analândia","Andradina","Angatuba","Anhembi","Anhumas","Aparecida","Aparecida d'Oeste","Apiaí","Aramina","Arandu","Arapeí","Araraquara","Araras","Araçariguama","Araçatuba","Araçoiaba da Serra","Arco-Íris","Arealva","Areias","Areiópolis","Ariranha","Artur Nogueira","Arujá","Aspásia","Assis","Atibaia","Auriflama","Avanhandava","Avaré","Avaí","Bady Bassitt","Balbinos","Bananal","Barbosa","Bariri","Barra Bonita","Barra do Chapéu","Barra do Turvo","Barretos","Barrinha","Barueri","Barão de Antonina","Bastos","Batatais","Bauru","Bebedouro","Bento de Abreu","Bernardino de Campos","Bertioga","Bilac","Birigui","Biritiba-Mirim","Boa Esperança do Sul","Bocaina","Bofete","Boituva","Bom Jesus dos Perdões","Bom Sucesso de Itararé","Boracéia","Borborema","Borebi","Borá","Botucatu","Bragança Paulista","Braúna","Brejo Alegre","Brodowski","Brotas","Buri","Buritama","Buritizal","Bálsamo","Cabreúva","Cabrália Paulista","Cachoeira Paulista","Caconde","Cafelândia","Caiabu","Caieiras","Caiuá","Cajamar","Cajati","Cajobi","Cajuru","Campina do Monte Alegre","Campinas","Campo Limpo Paulista","Campos Novos Paulista","Campos do Jordão","Cananéia","Canas","Canitar","Capela do Alto","Capivari","Capão Bonito","Caraguatatuba","Carapicuíba","Cardoso","Casa Branca","Castilho","Catanduva","Catiguá","Caçapava","Cedral","Cerqueira César","Cerquilho","Cesário Lange","Charqueada","Chavantes","Clementina","Colina","Colômbia","Conchal","Conchas","Cordeirópolis","Coroados","Coronel Macedo","Corumbataí","Cosmorama","Cosmópolis","Cotia","Cravinhos","Cristais Paulista","Cruzeiro","Cruzália","Cubatão","Cunha","Cássia dos Coqueiros","Cândido Mota","Cândido Rodrigues","Descalvado","Diadema","Dirce Reis","Divinolândia","Dobrada","Dois Córregos","Dolcinópolis","Dourado","Dracena","Duartina","Dumont","Echaporã","Eldorado","Elias Fausto","Elisiário","Embaúba","Embu das Artes","Embu-Guaçu","Emilianópolis","Engenheiro Coelho","Espírito Santo do Pinhal","Espírito Santo do Turvo","Estiva Gerbi","Estrela d'Oeste","Estrela do Norte","Euclides da Cunha Paulista","Fartura","Fernando Prestes","Fernandópolis","Fernão","Ferraz de Vasconcelos","Flora Rica","Floreal","Florínia","Flórida Paulista","Franca","Francisco Morato","Franco da Rocha","Gabriel Monteiro","Garça","Gastão Vidigal","Gavião Peixoto","General Salgado","Getulina","Glicério","Guaimbê","Guaiçara","Guapiara","Guapiaçu","Guaraci","Guarani d'Oeste","Guarantã","Guararapes","Guararema","Guaratinguetá","Guaraçaí","Guareí","Guariba","Guarujá","Guarulhos","Guará","Guatapará","Guaíra","Guzolândia","Gália","Herculândia","Holambra","Hortolândia","Iacanga","Iacri","Iaras","Ibaté","Ibirarema","Ibirá","Ibitinga","Ibiúna","Icém","Iepê","Igarapava","Igaratá","Igaraçu do Tietê","Iguape","Ilha Comprida","Ilha Solteira","Ilhabela","Indaiatuba","Indiana","Indiaporã","Inúbia Paulista","Ipaussu","Iperó","Ipeúna","Ipiguá","Iporanga","Ipuã","Iracemápolis","Irapuru","Irapuã","Itaberá","Itajobi","Itaju","Itanhaém","Itapecerica da Serra","Itapetininga","Itapeva","Itapevi","Itapira","Itapirapuã Paulista","Itaporanga","Itapura","Itapuí","Itaquaquecetuba","Itararé","Itariri","Itatiba","Itatinga","Itaí","Itaóca","Itirapina","Itirapuã","Itobi","Itu","Itupeva","Ituverava","Itápolis","Jaborandi","Jaboticabal","Jacareí","Jaci","Jacupiranga","Jaguariúna","Jales","Jambeiro","Jandira","Jardinópolis","Jarinu","Jaú","Jeriquara","Joanópolis","José Bonifácio","João Ramalho","Jumirim","Jundiaí","Junqueirópolis","Juquitiba","Juquiá","Júlio Mesquita","Lagoinha","Laranjal Paulista","Lavrinhas","Lavínia","Leme","Lençóis Paulista","Limeira","Lindóia","Lins","Lorena","Lourdes","Louveira","Lucianópolis","Lucélia","Luiziânia","Lupércio","Lutécia","Luís Antônio","Macatuba","Macaubal","Macedônia","Magda","Mairinque","Mairiporã","Manduri","Marabá Paulista","Maracaí","Marapoama","Marinópolis","Mariápolis","Martinópolis","Marília","Matão","Mauá","Mendonça","Meridiano","Mesópolis","Miguelópolis","Mineiros do Tietê","Mira Estrela","Miracatu","Mirandópolis","Mirante do Paranapanema","Mirassol","Mirassolândia","Mococa","Mogi Guaçu","Mogi Mirim","Mogi das Cruzes","Mombuca","Mongaguá","Monte Alegre do Sul","Monte Alto","Monte Aprazível","Monte Azul Paulista","Monte Castelo","Monte Mor","Monteiro Lobato","Monções","Morro Agudo","Morungaba","Motuca","Murutinga do Sul","Nantes","Narandiba","Natividade da Serra","Nazaré Paulista","Neves Paulista","Nhandeara","Nipoã","Nova Aliança","Nova Campina","Nova Canaã Paulista","Nova Castilho","Nova Europa","Nova Granada","Nova Guataporanga","Nova Independência","Nova Luzitânia","Nova Odessa","Novais","Novo Horizonte","Nuporanga","Ocauçu","Olímpia","Onda Verde","Oriente","Orindiúva","Orlândia","Osasco","Oscar Bressane","Osvaldo Cruz","Ourinhos","Ouro Verde","Ouroeste","Pacaembu","Palestina","Palmares Paulista","Palmeira d'Oeste","Palmital","Panorama","Paraguaçu Paulista","Paraibuna","Paranapanema","Paranapuã","Parapuã","Paraíso","Pardinho","Pariquera-Açu","Parisi","Patrocínio Paulista","Paulicéia","Paulistânia","Paulo de Faria","Paulínia","Pederneiras","Pedra Bela","Pedranópolis","Pedregulho","Pedreira","Pedrinhas Paulista","Pedro de Toledo","Penápolis","Pereira Barreto","Pereiras","Peruíbe","Piacatu","Piedade","Pilar do Sul","Pindamonhangaba","Pindorama","Pinhalzinho","Piquerobi","Piquete","Piracaia","Piracicaba","Piraju","Pirajuí","Pirangi","Pirapora do Bom Jesus","Pirapozinho","Pirassununga","Piratininga","Pitangueiras","Planalto","Platina","Poloni","Pompéia","Pongaí","Pontal","Pontalinda","Pontes Gestal","Populina","Porangaba","Porto Feliz","Porto Ferreira","Potim","Potirendaba","Poá","Pracinha","Pradópolis","Praia Grande","Pratânia","Presidente Alves","Presidente Bernardes","Presidente Epitácio","Presidente Prudente","Presidente Venceslau","Promissão","Quadra","Quatá","Queiroz","Queluz","Quintana","Rafard","Rancharia","Redenção da Serra","Regente Feijó","Reginópolis","Registro","Restinga","Ribeira","Ribeirão Bonito","Ribeirão Branco","Ribeirão Corrente","Ribeirão Grande","Ribeirão Pires","Ribeirão Preto","Ribeirão do Sul","Ribeirão dos Índios","Rifaina","Rincão","Rinópolis","Rio Claro","Rio Grande da Serra","Rio das Pedras","Riolândia","Riversul","Rosana","Roseira","Rubinéia","Rubiácea","Sabino","Sagres","Sales","Sales Oliveira","Salesópolis","Salmourão","Saltinho","Salto","Salto Grande","Salto de Pirapora","Sandovalina","Santa Adélia","Santa Albertina","Santa Branca","Santa Bárbara d'Oeste","Santa Clara d'Oeste","Santa Cruz da Conceição","Santa Cruz da Esperança","Santa Cruz das Palmeiras","Santa Cruz do Rio Pardo","Santa Ernestina","Santa Fé do Sul","Santa Gertrudes","Santa Isabel","Santa Lúcia","Santa Maria da Serra","Santa Mercedes","Santa Rita d'Oeste","Santa Rita do Passa Quatro","Santa Rosa de Viterbo","Santa Salete","Santana da Ponte Pensa","Santana de Parnaíba","Santo Anastácio","Santo André","Santo Antônio da Alegria","Santo Antônio de Posse","Santo Antônio do Aracanguá","Santo Antônio do Jardim","Santo Antônio do Pinhal","Santo Expedito","Santos","Santópolis do Aguapeí","Sarapuí","Sarutaiá","Sebastianópolis do Sul","Serra Azul","Serra Negra","Serrana","Sertãozinho","Sete Barras","Severínia","Silveiras","Socorro","Sorocaba","Sud Mennucci","Sumaré","Suzano","Suzanápolis","São Bento do Sapucaí","São Bernardo do Campo","São Caetano do Sul","São Carlos","São Francisco","São Joaquim da Barra","São José da Bela Vista","São José do Barreiro","São José do Rio Pardo","São José do Rio Preto","São José dos Campos","São João da Boa Vista","São João das Duas Pontes","São João de Iracema","São João do Pau d'Alho","São Lourenço da Serra","São Luiz do Paraitinga","São Manuel","São Miguel Arcanjo","São Paulo","São Pedro","São Pedro do Turvo","São Roque","São Sebastião","São Sebastião da Grama","São Simão","São Vicente","Tabapuã","Tabatinga","Taboão da Serra","Taciba","Taguaí","Taiaçu","Taiúva","Tambaú","Tanabi","Tapiratiba","Tapiraí","Taquaral","Taquaritinga","Taquarituba","Taquarivaí","Tarabai","Tarumã","Tatuí","Taubaté","Tejupá","Teodoro Sampaio","Terra Roxa","Tietê","Timburi","Torre de Pedra","Torrinha","Trabiju","Tremembé","Três Fronteiras","Tuiuti","Tupi Paulista","Tupã","Turiúba","Turmalina","Ubarana","Ubatuba","Ubirajara","Uchoa","União Paulista","Uru","Urupês","Urânia","Valentim Gentil","Valinhos","Valparaíso","Vargem","Vargem Grande Paulista","Vargem Grande do Sul","Vera Cruz","Vinhedo","Viradouro","Vista Alegre do Alto","Vitória Brasil","Votorantim","Votuporanga","Várzea Paulista","Zacarias","Águas da Prata","Águas de Lindóia","Águas de Santa Bárbara","Águas de São Pedro","Álvares Florence","Álvares Machado","Álvaro de Carvalho","Óleo"],"Espírito Santo":["Afonso Cláudio","Alegre","Alfredo Chaves","Alto Rio Novo","Anchieta","Apiacá","Aracruz","Atilio Vivacqua","Baixo Guandu","Barra de São Francisco","Boa Esperança","Bom Jesus do Norte","Brejetuba","Cachoeiro de Itapemirim","Cariacica","Castelo","Colatina","Conceição da Barra","Conceição do Castelo","Divino de São Lourenço","Domingos Martins","Dores do Rio Preto","Ecoporanga","Fundão","Governador Lindenberg","Guarapari","Guaçuí","Ibatiba","Ibiraçu","Ibitirama","Iconha","Irupi","Itaguaçu","Itapemirim","Itarana","Iúna","Jaguaré","Jerônimo Monteiro","João Neiva","Laranja da Terra","Linhares","Mantenópolis","Marataízes","Marechal Floriano","Marilândia","Mimoso do Sul","Montanha","Mucurici","Muniz Freire","Muqui","Nova Venécia","Pancas","Pedro Canário","Pinheiros","Piúma","Ponto Belo","Presidente Kennedy","Rio Bananal","Rio Novo do Sul","Santa Leopoldina","Santa Maria de Jetibá","Santa Teresa","Serra","Sooretama","São Domingos do Norte","São Gabriel da Palha","São José do Calçado","São Mateus","São Roque do Canaã","Vargem Alta","Venda Nova do Imigrante","Viana","Vila Pavão","Vila Valério","Vila Velha","Vitória","Água Doce do Norte","Águia Branca"],"Paraíba":["Aguiar","Alagoa Grande","Alagoa Nova","Alagoinha","Alcantil","Algodão de Jandaíra","Alhandra","Amparo","Aparecida","Arara","Araruna","Araçagi","Areia","Areia de Baraúnas","Areial","Aroeiras","Assunção","Bananeiras","Baraúna","Barra de Santa Rosa","Barra de Santana","Barra de São Miguel","Bayeux","Baía da Traição","Belém","Belém do Brejo do Cruz","Bernardino Batista","Boa Ventura","Boa Vista","Bom Jesus","Bom Sucesso","Bonito de Santa Fé","Boqueirão","Borborema","Brejo do Cruz","Brejo dos Santos","Caaporã","Cabaceiras","Cabedelo","Cachoeira dos Índios","Cacimba de Areia","Cacimba de Dentro","Cacimbas","Caiçara","Cajazeiras","Cajazeirinhas","Caldas Brandão","Camalaú","Campina Grande","Capim","Caraúbas","Carrapateira","Casserengue","Catingueira","Catolé do Rocha","Caturité","Conceição","Condado","Conde","Congo","Coremas","Coxixola","Cruz do Espírito Santo","Cubati","Cuitegi","Cuité","Cuité de Mamanguape","Curral Velho","Curral de Cima","Damião","Desterro","Diamante","Dona Inês","Duas Estradas","Emas","Esperança","Fagundes","Frei Martinho","Gado Bravo","Guarabira","Gurinhém","Gurjão","Ibiara","Igaracy","Imaculada","Ingá","Itabaiana","Itaporanga","Itapororoca","Itatuba","Jacaraú","Jericó","Joca Claudino","João Pessoa","Juarez Távora","Juazeirinho","Junco do Seridó","Juripiranga","Juru","Lagoa","Lagoa Seca","Lagoa de Dentro","Lastro","Livramento","Logradouro","Lucena","Malta","Mamanguape","Manaíra","Marcação","Mari","Marizópolis","Massaranduba","Mataraca","Matinhas","Mato Grosso","Maturéia","Mogeiro","Montadas","Monte Horebe","Monteiro","Mulungu","Mãe d'Água","Natuba","Nazarezinho","Nova Floresta","Nova Olinda","Nova Palmeira","Olho d'Água","Olivedos","Ouro Velho","Parari","Passagem","Patos","Paulista","Pedra Branca","Pedra Lavrada","Pedras de Fogo","Pedro Régis","Piancó","Picuí","Pilar","Pilões","Pilõezinhos","Pirpirituba","Pitimbu","Pocinhos","Pombal","Poço Dantas","Poço de José de Moura","Prata","Princesa Isabel","Puxinanã","Queimadas","Quixabá","Remígio","Riacho de Santo Antônio","Riacho dos Cavalos","Riachão","Riachão do Bacamarte","Riachão do Poço","Rio Tinto","Salgadinho","Salgado de São Félix","Santa Cecília","Santa Cruz","Santa Helena","Santa Inês","Santa Luzia","Santa Rita","Santa Teresinha","Santana de Mangueira","Santana dos Garrotes","Santo André","Sapé","Serra Branca","Serra Grande","Serra Redonda","Serra da Raiz","Serraria","Sertãozinho","Sobrado","Soledade","Solânea","Sossêgo","Sousa","Sumé","São Bentinho","São Bento","São Domingos","São Domingos do Cariri","São Francisco","São José da Lagoa Tapada","São José de Caiana","São José de Espinharas","São José de Piranhas","São José de Princesa","São José do Bonfim","São José do Brejo do Cruz","São José do Sabugi","São José dos Cordeiros","São José dos Ramos","São João do Cariri","São João do Rio do Peixe","São João do Tigre","São Mamede","São Miguel de Taipu","São Sebastião de Lagoa de Roça","São Sebastião do Umbuzeiro","São Vicente do Seridó","Tacima","Taperoá","Tavares","Teixeira","Tenório","Triunfo","Uiraúna","Umbuzeiro","Vieirópolis","Vista Serrana","Várzea","Zabelê","Água Branca"],"Alagoas":["Anadia","Arapiraca","Atalaia","Barra de Santo Antônio","Barra de São Miguel","Batalha","Belo Monte","Belém","Boca da Mata","Branquinha","Cacimbinhas","Cajueiro","Campestre","Campo Alegre","Campo Grande","Canapi","Capela","Carneiros","Chã Preta","Coité do Nóia","Colônia Leopoldina","Coqueiro Seco","Coruripe","Craíbas","Delmiro Gouveia","Dois Riachos","Estrela de Alagoas","Feira Grande","Feliz Deserto","Flexeiras","Girau do Ponciano","Ibateguara","Igaci","Igreja Nova","Inhapi","Jacaré dos Homens","Jacuípe","Japaratinga","Jaramataia","Jequiá da Praia","Joaquim Gomes","Jundiá","Junqueiro","Lagoa da Canoa","Limoeiro de Anadia","Maceió","Major Isidoro","Mar Vermelho","Maragogi","Maravilha","Marechal Deodoro","Maribondo","Mata Grande","Matriz de Camaragibe","Messias","Minador do Negrão","Monteirópolis","Murici","Novo Lino","Olho d'Água Grande","Olho d'Água das Flores","Olho d'Água do Casado","Olivença","Ouro Branco","Palestina","Palmeira dos Índios","Pariconha","Paripueira","Passo de Camaragibe","Paulo Jacinto","Penedo","Piaçabuçu","Pilar","Pindoba","Piranhas","Porto Calvo","Porto Real do Colégio","Porto de Pedras","Poço das Trincheiras","Pão de Açúcar","Quebrangulo","Rio Largo","Roteiro","Santa Luzia do Norte","Santana do Ipanema","Santana do Mundaú","Satuba","Senador Rui Palmeira","São Brás","São José da Laje","São José da Tapera","São Luís do Quitunde","São Miguel dos Campos","São Miguel dos Milagres","São Sebastião","Tanque d'Arca","Taquarana","Teotônio Vilela","Traipu","União dos Palmares","Viçosa","Água Branca"],"Mato Grosso do Sul":["Alcinópolis","Amambai","Anastácio","Anaurilândia","Angélica","Antônio João","Aparecida do Taboado","Aquidauana","Aral Moreira","Bandeirantes","Bataguassu","Batayporã","Bela Vista","Bodoquena","Bonito","Brasilândia","Caarapó","Camapuã","Campo Grande","Caracol","Cassilândia","Chapadão do Sul","Corguinho","Coronel Sapucaia","Corumbá","Costa Rica","Coxim","Deodápolis","Dois Irmãos do Buriti","Douradina","Dourados","Eldorado","Figueirão","Fátima do Sul","Glória de Dourados","Guia Lopes da Laguna","Iguatemi","Inocência","Itaporã","Itaquiraí","Ivinhema","Japorã","Jaraguari","Jardim","Jateí","Juti","Ladário","Laguna Carapã","Maracaju","Miranda","Mundo Novo","Naviraí","Nioaque","Nova Alvorada do Sul","Nova Andradina","Novo Horizonte do Sul","Paranaíba","Paranhos","Paraíso das Águas","Pedro Gomes","Ponta Porã","Porto Murtinho","Ribas do Rio Pardo","Rio Brilhante","Rio Negro","Rio Verde de Mato Grosso","Rochedo","Santa Rita do Pardo","Selvíria","Sete Quedas","Sidrolândia","Sonora","São Gabriel do Oeste","Tacuru","Taquarussu","Terenos","Três Lagoas","Vicentina","Água Clara"],"Rondônia":["Alta Floresta D'Oeste","Alto Alegre dos Parecis","Alto Paraíso","Alvorada D'Oeste","Ariquemes","Buritis","Cabixi","Cacaulândia","Cacoal","Campo Novo de Rondônia","Candeias do Jamari","Castanheiras","Cerejeiras","Chupinguaia","Colorado do Oeste","Corumbiara","Costa Marques","Cujubim","Espigão D'Oeste","Governador Jorge Teixeira","Guajará-Mirim","Itapuã do Oeste","Jaru","Ji-Paraná","Machadinho D'Oeste","Ministro Andreazza","Mirante da Serra","Monte Negro","Nova Brasilândia D'Oeste","Nova Mamoré","Nova União","Novo Horizonte do Oeste","Ouro Preto do Oeste","Parecis","Pimenta Bueno","Pimenteiras do Oeste","Porto Velho","Presidente Médici","Primavera de Rondônia","Rio Crespo","Rolim de Moura","Santa Luzia D'Oeste","Seringueiras","São Felipe D'Oeste","São Francisco do Guaporé","São Miguel do Guaporé","Teixeirópolis","Theobroma","Urupá","Vale do Anari","Vale do Paraíso","Vilhena"],"Roraima":["Alto Alegre","Amajari","Boa Vista","Bonfim","Cantá","Caracaraí","Caroebe","Iracema","Mucajaí","Normandia","Pacaraima","Rorainópolis","São João da Baliza","São Luiz","Uiramutã"],"Amazonas":["Alvarães","Amaturá","Anamã","Anori","Apuí","Atalaia do Norte","Autazes","Barcelos","Barreirinha","Benjamin Constant","Beruri","Boa Vista do Ramos","Boca do Acre","Borba","Caapiranga","Canutama","Carauari","Careiro","Careiro da Várzea","Coari","Codajás","Eirunepé","Envira","Fonte Boa","Guajará","Humaitá","Ipixuna","Iranduba","Itacoatiara","Itamarati","Itapiranga","Japurá","Juruá","Jutaí","Lábrea","Manacapuru","Manaquiri","Manaus","Manicoré","Maraã","Maués","Nhamundá","Nova Olinda do Norte","Novo Airão","Novo Aripuanã","Parintins","Pauini","Presidente Figueiredo","Rio Preto da Eva","Santa Isabel do Rio Negro","Santo Antônio do Içá","Silves","São Gabriel da Cachoeira","São Paulo de Olivença","São Sebastião do Uatumã","Tabatinga","Tapauá","Tefé","Tonantins","Uarini","Urucará","Urucurituba"],"Amapá":["Amapá","Calçoene","Cutias","Ferreira Gomes","Itaubal","Laranjal do Jari","Macapá","Mazagão","Oiapoque","Pedra Branca do Amapari","Porto Grande","Pracuúba","Santana","Serra do Navio","Tartarugalzinho","Vitória do Jari"],"Sergipe":["Amparo de São Francisco","Aquidabã","Aracaju","Arauá","Areia Branca","Barra dos Coqueiros","Boquim","Brejo Grande","Campo do Brito","Canhoba","Canindé de São Francisco","Capela","Carira","Carmópolis","Cedro de São João","Cristinápolis","Cumbe","Divina Pastora","Estância","Feira Nova","Frei Paulo","Gararu","General Maynard","Gracho Cardoso","Ilha das Flores","Indiaroba","Itabaiana","Itabaianinha","Itabi","Itaporanga d'Ajuda","Japaratuba","Japoatã","Lagarto","Laranjeiras","Macambira","Malhada dos Bois","Malhador","Maruim","Moita Bonita","Monte Alegre de Sergipe","Muribeca","Neópolis","Nossa Senhora Aparecida","Nossa Senhora da Glória","Nossa Senhora das Dores","Nossa Senhora de Lourdes","Nossa Senhora do Socorro","Pacatuba","Pedra Mole","Pedrinhas","Pinhão","Pirambu","Porto da Folha","Poço Redondo","Poço Verde","Propriá","Riachuelo","Riachão do Dantas","Ribeirópolis","Rosário do Catete","Salgado","Santa Luzia do Itanhy","Santa Rosa de Lima","Santana do São Francisco","Santo Amaro das Brotas","Simão Dias","Siriri","São Cristóvão","São Domingos","São Francisco","São Miguel do Aleixo","Telha","Tobias Barreto","Tomar do Geru","Umbaúba"],"Rio de Janeiro":["Angra dos Reis","Aperibé","Araruama","Areal","Armação dos Búzios","Arraial do Cabo","Barra Mansa","Barra do Piraí","Belford Roxo","Bom Jardim","Bom Jesus do Itabapoana","Cabo Frio","Cachoeiras de Macacu","Cambuci","Campos dos Goytacazes","Cantagalo","Carapebus","Cardoso Moreira","Carmo","Casimiro de Abreu","Comendador Levy Gasparian","Conceição de Macabu","Cordeiro","Duas Barras","Duque de Caxias","Engenheiro Paulo de Frontin","Guapimirim","Iguaba Grande","Itaboraí","Itaguaí","Italva","Itaocara","Itaperuna","Itatiaia","Japeri","Laje do Muriaé","Macaé","Macuco","Magé","Mangaratiba","Maricá","Mendes","Mesquita","Miguel Pereira","Miracema","Natividade","Nilópolis","Niterói","Nova Friburgo","Nova Iguaçu","Paracambi","Paraty","Paraíba do Sul","Paty do Alferes","Petrópolis","Pinheiral","Piraí","Porciúncula","Porto Real","Quatis","Queimados","Quissamã","Resende","Rio Bonito","Rio Claro","Rio das Flores","Rio das Ostras","Rio de Janeiro","Santa Maria Madalena","Santo Antônio de Pádua","Sapucaia","Saquarema","Seropédica","Silva Jardim","Sumidouro","São Fidélis","São Francisco de Itabapoana","São Gonçalo","São José de Ubá","São José do Vale do Rio Preto","São João da Barra","São João de Meriti","São Pedro da Aldeia","São Sebastião do Alto","Tanguá","Teresópolis","Trajano de Moraes","Três Rios","Valença","Varre-Sai","Vassouras","Volta Redonda"],"Distrito Federal":["Brasília"]};
+  const ESTADOS_BR = ["Acre","Alagoas","Amapá","Amazonas","Bahia","Ceará","Distrito Federal","Espírito Santo","Goiás","Maranhão","Mato Grosso","Mato Grosso do Sul","Minas Gerais","Paraná","Paraíba","Pará","Pernambuco","Piauí","Rio Grande do Norte","Rio Grande do Sul","Rio de Janeiro","Rondônia","Roraima","Santa Catarina","Sergipe","São Paulo","Tocantins"];
+  
+
+  var proximoId = 3;
+  var visitas = [
+    { id: 1, fazenda: "Santa Edwirges", municipio: "Marumbi PR", status: "sincronizado", dados: { data_visita: "2026-06-18", especialista: "Paulo Victor Ornellas" }, fotos: {}, gps_visita: null },
+    { id: 2, fazenda: "Monte Carmelo", municipio: "Marumbi PR", status: "pendente", dados: { data_visita: "2026-06-19" }, fotos: {}, gps_visita: null }
+  ];
+  var visitaAtualId = 1;
+  function visitaAtual() { return visitas.filter(function (v) { return v.id === visitaAtualId; })[0]; }
+
+  // ---------------------------------------------------------------------
+  // IndexedDB — persistência real. Cada alteração de campo grava aqui,
+  // não só na memória. Sobrevive a fechar o navegador, matar o app,
+  // ficar sem internet e reabrir depois.
+  // ---------------------------------------------------------------------
+  var DB_NOME = "AlltechBiomassaDB";
+  var DB_VERSAO = 1;
+  var db = null;
+
+  function abrirBanco() {
+    return new Promise(function (resolve) {
+      if (!("indexedDB" in window)) { resolve(null); return; }
+      var pedido;
+      try { pedido = indexedDB.open(DB_NOME, DB_VERSAO); } catch (e) { resolve(null); return; }
+      pedido.onupgradeneeded = function (evt) {
+        var banco = evt.target.result;
+        if (!banco.objectStoreNames.contains("visitas")) {
+          banco.createObjectStore("visitas", { keyPath: "id" });
+        }
+      };
+      pedido.onsuccess = function (evt) { resolve(evt.target.result); };
+      pedido.onerror = function () { resolve(null); };
+    });
+  }
+
+  function persistir(visita) {
+    if (!db || !visita) return;
+    try {
+      var tx = db.transaction("visitas", "readwrite");
+      tx.objectStore("visitas").put(visita);
+    } catch (e) { /* falha silenciosa — o dado ainda fica na memória da sessão atual */ }
+  }
+
+  function excluirDoBanco(id) {
+    if (!db) return;
+    try {
+      var tx = db.transaction("visitas", "readwrite");
+      tx.objectStore("visitas").delete(id);
+    } catch (e) {}
+  }
+
+  function carregarTodasDoBanco() {
+    return new Promise(function (resolve) {
+      if (!db) { resolve([]); return; }
+      try {
+        var tx = db.transaction("visitas", "readonly");
+        var pedido = tx.objectStore("visitas").getAll();
+        pedido.onsuccess = function () { resolve(pedido.result || []); };
+        pedido.onerror = function () { resolve([]); };
+      } catch (e) { resolve([]); }
+    });
+  }
+
+  var SECOES = [
+    { id: "identificacao", titulo: "Identificação da visita", campos: [
+      { k: "data_visita", l: "Data da visita", t: "date" },
+      { k: "hora_inicio", l: "Hora de início", t: "time" },
+      { k: "hora_termino", l: "Hora de término", t: "time" },
+      { k: "especialista", l: "Nome do especialista", t: "text" },
+      { k: "estado", l: "Estado", t: "select", opts: ESTADOS_BR },
+      { k: "municipio", l: "Município", t: "select", dynamic: "municipios" },
+      { k: "regiao", l: "Região", t: "select", opts: ["Norte", "Noroeste", "Oeste", "Sul", "Outro"] },
+      { k: "origem_contato", l: "Origem do contato", t: "select", opts: ["Banco de dados", "Via parceiro comercial", "Indicação", "Outro"] },
+      { k: "gps_visita", l: "Localização da visita", t: "gps" }
+    ]},
+    { id: "propriedade", titulo: "Propriedade e proprietário", campos: [
+      { k: "nome_fazenda", l: "Nome da fazenda/propriedade", t: "text" },
+      { k: "proprietario", l: "Proprietário", t: "text" },
+      { k: "tipo_documento", l: "Tipo de documento", t: "choice2", opts: ["CPF", "CNPJ"] },
+      { k: "cpf_cnpj", l: "CPF/CNPJ", t: "doc" },
+      { k: "telefone", l: "Telefone", t: "text", mask: "tel", ph: "(00) 00000-0000" },
+      { k: "whatsapp", l: "WhatsApp", t: "text", mask: "tel", ph: "(00) 00000-0000" },
+      { k: "endereco", l: "Endereço completo", t: "textarea" }
+    ]},
+    { id: "perfil_area", titulo: "Perfil da área", campos: [
+      { k: "area_total", l: "Área total da fazenda", t: "number", u: "ha" },
+      { k: "area_agricola", l: "Área agrícola", t: "number", u: "ha" },
+      { k: "area_pastagem", l: "Área de pastagem", t: "number", u: "ha" },
+      { k: "area_florestal_atual", l: "Área florestal atual", t: "number", u: "ha" },
+      { k: "area_disponivel_floresta", l: "Área disponível para floresta", t: "number", u: "ha" },
+      { k: "area_arrendada", l: "Área arrendada", t: "number", u: "ha" },
+      { k: "area_propria", l: "Área própria", t: "number", u: "ha" },
+      { k: "atividade_principal", l: "Atividade principal", t: "text" }
+    ]},
+    { id: "floresta_atual", titulo: "Floresta existente", campos: [
+      { k: "possui_eucalipto", l: "Possui plantio de eucalipto?", t: "toggle" },
+      { k: "area_plantada", l: "Área plantada", t: "number", u: "ha" },
+      { k: "idade_media", l: "Idade média do plantio", t: "number", u: "anos" },
+      { k: "material_genetico", l: "Material genético", t: "text" },
+      { k: "volume_estimado", l: "Volume estimado", t: "number", u: "m³" },
+      { k: "incremento_medio", l: "Incremento médio da floresta", t: "text", ph: "ex: 400 a 500 m³/ano" },
+      { k: "incidencia_falhas", l: "Incidência de falhas de plantio", t: "number", u: "%" },
+      { k: "homogeneidade", l: "Homogeneidade dos indivíduos", t: "select", opts: ["Bom 90% a 70%", "Ruim acima de 10%", "Outro"] },
+      { k: "individuos_idades_diferentes", l: "Indivíduos com idades diferentes no mesmo bloco?", t: "toggle" },
+      { k: "possui_patogeno", l: "Foi encontrado patógeno ou doença?", t: "toggle" },
+      { k: "patogeno_qual", l: "Se sim, qual?", t: "text", showIf: "possui_patogeno" },
+      { k: "declividade", l: "Declividade média do solo", t: "select", opts: ["Predominantemente até 5°", "De 5° a 15°", "Acima de 15°"] },
+      { k: "macico_app_rl", l: "Maciço florestal próximo a APP ou RL?", t: "toggle" },
+      { k: "colheita_indicada", l: "Colheita mais indicada", t: "select", opts: ["Mecanizada", "Motosserra", "Outro"] },
+      { k: "destino_madeira", l: "Destino atual da madeira", t: "text" },
+      { k: "conduzira_brotacao", l: "Irá conduzir brotação?", t: "toggle" },
+      { k: "ciclo_plantio", l: "Qual ciclo de plantio", t: "select", opts: ["Primeiro", "Segundo", "Terceiro ou mais"] },
+      { k: "vencimento_contrato", l: "Vencimento do contrato", t: "text" }
+    ]},
+    { id: "potencial_futuro", titulo: "Potencial futuro", campos: [
+      { k: "interesse_novos_plantios", l: "Existe interesse em novos plantios?", t: "toggle" },
+      { k: "area_disponivel_expansao", l: "Área disponível para expansão", t: "number", u: "ha" },
+      { k: "prazo_implantacao", l: "Prazo para implantação", t: "select", opts: ["Imediato", "Até 12 meses", "36 meses", "Outro"] },
+      { k: "modelo_interesse", l: "Modelo de interesse", t: "select", opts: ["Arrendamento", "Parceria", "Compra de madeira", "Fomento"] },
+      { k: "contrato_longo_prazo", l: "Interesse em contrato de longo prazo?", t: "toggle" },
+      { k: "volume_potencial", l: "Volume potencial de fornecimento", t: "number", u: "ton/ano" },
+      { k: "preco_esperado", l: "Preço esperado", t: "number", u: "R$/ton" },
+      { k: "comentarios_potencial", l: "Comentários", t: "textarea" }
+    ]},
+    { id: "logistica", titulo: "Logística", campos: [
+      { k: "tipo_acesso", l: "Tipo de acesso", t: "select", opts: ["Cascalho", "Pavimentação asfalto", "Terra", "Outro"] },
+      { k: "distancia_rodovia", l: "Distância até rodovia pavimentada", t: "number", u: "km" },
+      { k: "distancia_fabrica", l: "Distância até a fábrica", t: "number", u: "km" },
+      { k: "pct_via_excelente", l: "Trajeto em condição excelente", t: "number", u: "%" },
+      { k: "pct_via_boa", l: "Trajeto em condição boa", t: "number", u: "%" },
+      { k: "pct_via_ruim", l: "Trajeto em condição ruim", t: "number", u: "%" },
+      { k: "possui_pedagio", l: "Trajeto possui pedágio?", t: "toggle" },
+      { k: "valor_pedagio", l: "Valor do pedágio por eixo", t: "number", u: "R$", showIf: "possui_pedagio" },
+      { k: "possui_energia", l: "Possui energia elétrica?", t: "toggle" },
+      { k: "possui_equipamentos", l: "Possui equipamentos próprios?", t: "toggle" },
+      { k: "quais_equipamentos", l: "Quais equipamentos?", t: "text", showIf: "possui_equipamentos" },
+      { k: "area_carregamento", l: "Possui área para carregamento?", t: "toggle" },
+      { k: "area_patio", l: "Possui área para pátio intermediário?", t: "toggle" },
+      { k: "tempo_medio_unidade", l: "Tempo médio até a unidade", t: "number", u: "horas" },
+      { k: "custo_logistico", l: "Custo logístico estimado", t: "number", u: "R$/ton" },
+      { k: "observacoes_logisticas", l: "Observações logísticas", t: "textarea" }
+    ]},
+    { id: "ambiental", titulo: "Ambiental e documental", campos: [
+      { k: "existe_reserva_legal", l: "Existe reserva legal?", t: "toggle" },
+      { k: "car_regularizado", l: "CAR está regularizado?", t: "toggle" },
+      { k: "existem_restricoes", l: "Existem restrições ambientais?", t: "toggle" },
+      { k: "restricoes_descricao", l: "Se sim, descrever", t: "textarea", showIf: "existem_restricoes" }
+    ]},
+    { id: "evidencias", titulo: "Evidências de campo", campos: [
+      { k: "foto_entrada", l: "Entrada da fazenda", t: "photo" },
+      { k: "foto_sede", l: "Sede", t: "photo" },
+      { k: "foto_area_disponivel", l: "Área disponível", t: "photo" },
+      { k: "foto_plantio", l: "Plantio existente", t: "photo" },
+      { k: "foto_estradas", l: "Estradas de acesso", t: "photo" },
+      { k: "foto_panoramica", l: "Foto panorâmica", t: "photo" }
+    ]},
+    { id: "pontuacao", titulo: "Revisão e pontuação", campos: [
+      { k: "potencial_fornecimento", l: "Potencial de fornecimento", t: "select", opts: ["Bom", "Regular", "Baixo"] },
+      { k: "capacidade_estimada", l: "Capacidade estimada", t: "number", u: "ton/ano" },
+      { k: "score_area", l: "Área disponível", t: "range", max: 25 },
+      { k: "score_interesse", l: "Interesse comercial", t: "range", max: 25 },
+      { k: "score_logistica", l: "Logística", t: "range", max: 20 },
+      { k: "score_producao", l: "Potencial de produção", t: "range", max: 20 },
+      { k: "score_ambiental", l: "Aspectos ambientais", t: "range", max: 10 },
+      { k: "resumo_pontuacao", l: "Resultado", t: "resumo" },
+      { k: "recomendacao", l: "Recomendação", t: "select", opts: ["Elaborar proposta", "Aguardar retorno", "Descartar"] },
+      { k: "resumo_executivo", l: "Resumo executivo da visita", t: "textarea" },
+      { k: "proximas_acoes", l: "Próximas ações", t: "textarea" }
+    ]}
+  ];
+
+  var state = { tela: "home", secaoAtual: null };
+  var bar = document.getElementById("bar");
+  var content = document.getElementById("content");
+  var footerBar = document.getElementById("footerBar");
+  var toast = document.getElementById("toast");
+  var shell = document.getElementById("shell");
+
+  function fmt(n) { return new Intl.NumberFormat("pt-BR").format(n); }
+
+  function preenchidos(secao) {
+    var visita = visitaAtual();
+    var total = secao.campos.filter(function (c) { return c.t !== "gps" && c.t !== "resumo"; }).length;
+    var ok = 0;
+    secao.campos.forEach(function (c) {
+      if (c.t === "gps" || c.t === "resumo") return;
+      var v = visita.dados[c.k];
+      if (c.t === "photo") { if (visita.fotos[c.k]) ok++; return; }
+      if (c.t === "toggle") { if (v === true || v === false) ok++; return; }
+      if (v !== undefined && v !== null && v !== "") ok++;
+    });
+    return { ok: ok, total: total };
+  }
+
+  function statusSecao(secao) {
+    var p = preenchidos(secao);
+    if (p.total === 0 || p.ok === 0) return "pending";
+    if (p.ok === p.total) return "done";
+    return "partial";
+  }
+
+  function progressoGeral() {
+    var ok = 0, total = 0;
+    SECOES.forEach(function (s) { var p = preenchidos(s); ok += p.ok; total += p.total; });
+    return { ok: ok, total: total, pct: total ? Math.round((ok / total) * 100) : 0 };
+  }
+
+  function showToast() {
+    toast.classList.add("show");
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function () { toast.classList.remove("show"); }, 900);
+  }
+
+  function setVal(k, v) {
+    var visita = visitaAtual();
+    visita.dados[k] = v;
+    if (k === "nome_fazenda" && v) visita.fazenda = v;
+    if (k === "municipio" && v) visita.municipio = v + (visita.dados.estado === "Paraná" ? " PR" : "");
+    persistir(visita);
+    showToast();
+    renderSecaoAtual();
+  }
+
+  function renderBar() {
+    if (state.tela === "home") {
+      bar.innerHTML =
+        '<div class="bar-brand"><img alt="Alltech" src="data:image/png;base64,' + LOGO_B64 + '"><span>Prospecção de biomassa</span></div>' +
+        '<span class="conn-pill" id="connpill"></span>';
+    } else if (state.tela === "secoes") {
+      var visitaBar = visitaAtual();
+      bar.innerHTML =
+        '<button class="bar-back" id="backBtn">‹</button>' +
+        '<div class="bar-title">' + visitaBar.fazenda + '</div>' +
+        '<span class="sync-tag sync-' + visitaBar.status + '" style="margin:0">' + SYNC_LABEL[visitaBar.status] + '</span>';
+      document.getElementById("backBtn").onclick = function () { state.tela = "home"; render(); };
+    } else {
+      var secao = SECOES.filter(function (s) { return s.id === state.secaoAtual; })[0];
+      bar.innerHTML =
+        '<button class="bar-back" id="backBtn">‹</button>' +
+        '<div class="bar-title">' + secao.titulo + '</div>';
+      document.getElementById("backBtn").onclick = function () { state.tela = "secoes"; render(); };
+    }
+    var pill = document.getElementById("connpill");
+    if (pill) {
+      var online = typeof navigator !== "undefined" && navigator.onLine !== false;
+      pill.textContent = online ? "Online" : "Offline";
+      pill.className = "conn-pill " + (online ? "conn-online" : "conn-offline");
+    }
+  }
+
+  var SYNC_LABEL = { rascunho: "Rascunho em aberto", pendente: "Pendente de envio", sincronizado: "Sincronizado" };
+
+  function renderHome() {
+    var html = '';
+    if (!visitas.length) {
+      html = '<div class="picker-empty">Nenhuma visita ainda. Toque em "+ Nova visita" para começar.</div>';
+    }
+    visitas.forEach(function (v) {
+      var prog = 0, campos = { ok: 0, total: 0 };
+      SECOES.forEach(function (s) {
+        var savedId = visitaAtualId; visitaAtualId = v.id;
+        var p = preenchidos(s); campos.ok += p.ok; campos.total += p.total;
+        visitaAtualId = savedId;
+      });
+      prog = campos.total ? Math.round((campos.ok / campos.total) * 100) : 0;
+      html += '<div class="visit-card" data-id="' + v.id + '">' +
+        '<div class="vname">' + v.fazenda + '</div>' +
+        '<div class="vmeta">' + (v.municipio || "Município não informado") + '</div>' +
+        '<div class="vprogress"><span class="vtrack"><span style="width:' + prog + '%"></span></span><span class="vpct">' + prog + '%</span></div>' +
+        '<span class="sync-tag sync-' + v.status + '">' + SYNC_LABEL[v.status] + '</span>' +
+        '</div>';
+    });
+    content.innerHTML = html;
+    document.querySelectorAll(".visit-card").forEach(function (el) {
+      el.onclick = function () { visitaAtualId = Number(el.getAttribute("data-id")); state.tela = "secoes"; render(); };
+    });
+    footerBar.innerHTML = '<button class="btn-primary" id="novaVisita">+ Nova visita</button>';
+    document.getElementById("novaVisita").onclick = function () {
+      var id = proximoId++;
+      var nova = { id: id, fazenda: "Nova visita", municipio: "", status: "rascunho", dados: {}, fotos: {}, gps_visita: null };
+      visitas.unshift(nova);
+      persistir(nova);
+      visitaAtualId = id;
+      state.tela = "secoes";
+      render();
+    };
+  }
+
+  function renderSecoes() {
+    var prog = progressoGeral();
+    var visita = visitaAtual();
+    var html = '<div class="overall-progress"><span class="track"><span style="width:' + prog.pct + '%"></span></span><span class="lbl">' + prog.ok + ' de ' + prog.total + ' campos</span></div>';
+    SECOES.forEach(function (s) {
+      var st = statusSecao(s);
+      var p = preenchidos(s);
+      var label = st === "done" ? "Completo" : st === "partial" ? p.ok + "/" + p.total : "Pendente";
+      html += '<div class="section-row" data-id="' + s.id + '">' +
+        '<div class="left"><span class="status-dot status-' + st + '"></span><span class="stitle">' + s.titulo + '</span></div>' +
+        '<div class="sright">' + label + '<span class="chev">›</span></div>' +
+        '</div>';
+    });
+    content.innerHTML = html;
+    document.querySelectorAll(".section-row").forEach(function (el) {
+      el.onclick = function () { state.secaoAtual = el.getAttribute("data-id"); state.tela = "secaoDetalhe"; render(); };
+    });
+    footerBar.innerHTML = '<button class="btn-primary" id="concluirVisita">Concluir e enviar visita</button>';
+    document.getElementById("concluirVisita").onclick = function () {
+      var p = progressoGeral();
+      function enviar() {
+        var online = typeof navigator !== "undefined" && navigator.onLine !== false;
+        visita.status = online ? "sincronizado" : "pendente";
+        persistir(visita);
+        mostrarSucesso(online
+          ? "A visita foi enviada e sincronizada com o banco de dados."
+          : "A visita foi salva no dispositivo e entrará na fila de sincronização assim que a internet voltar.");
+      }
+      if (p.ok < p.total) {
+        abrirConfirmacao(
+          "Visita incompleta",
+          "Faltam " + (p.total - p.ok) + " de " + p.total + " campos para preencher. Deseja enviar mesmo assim?",
+          "Enviar mesmo assim",
+          enviar
+        );
+      } else {
+        enviar();
+      }
+    };
+  }
+
+  function campoVisivel(c) {
+    if (!c.showIf) return true;
+    return visitaAtual().dados[c.showIf] === true;
+  }
+
+  // ---------------------------------------------------------------------
+  // mascara de CPF/CNPJ
+  // ---------------------------------------------------------------------
+  function aplicarMascaraDoc(raw, tipo) {
+    var d = raw.replace(/\D/g, "");
+    if (tipo === "CNPJ") {
+      d = d.slice(0, 14);
+      var out = d;
+      out = out.replace(/^(\d{2})(\d)/, "$1.$2");
+      out = out.replace(/^(\d{2}\.\d{3})(\d)/, "$1.$2");
+      out = out.replace(/^(\d{2}\.\d{3}\.\d{3})(\d)/, "$1/$2");
+      out = out.replace(/^(\d{2}\.\d{3}\.\d{3}\/\d{4})(\d)/, "$1-$2");
+      return out;
+    }
+    d = d.slice(0, 11);
+    var out2 = d;
+    out2 = out2.replace(/^(\d{3})(\d)/, "$1.$2");
+    out2 = out2.replace(/^(\d{3}\.\d{3})(\d)/, "$1.$2");
+    out2 = out2.replace(/^(\d{3}\.\d{3}\.\d{3})(\d)/, "$1-$2");
+    return out2;
+  }
+
+  // ---------------------------------------------------------------------
+  // mascara de telefone/WhatsApp — (DD) XXXXX-XXXX (celular) ou (DD) XXXX-XXXX (fixo)
+  // ---------------------------------------------------------------------
+  function aplicarMascaraTelefone(raw) {
+    var d = raw.replace(/\D/g, "").slice(0, 11);
+    if (!d.length) return "";
+    if (d.length <= 2) return "(" + d;
+    var ddd = d.slice(0, 2), resto = d.slice(2);
+    if (resto.length <= 4) return "(" + ddd + ") " + resto;
+    if (d.length <= 10) return "(" + ddd + ") " + resto.slice(0, 4) + "-" + resto.slice(4);
+    return "(" + ddd + ") " + resto.slice(0, 5) + "-" + resto.slice(5);
+  }
+
+  // ---------------------------------------------------------------------
+  // confirmacao (bottom sheet centralizado) e tela de sucesso
+  // ---------------------------------------------------------------------
+  function abrirConfirmacao(titulo, msg, textoConfirmar, aoConfirmar) {
+    var overlay = document.createElement("div");
+    overlay.className = "confirm-overlay";
+    overlay.innerHTML =
+      '<div class="confirm-card">' +
+        '<div class="confirm-title">' + titulo + '</div>' +
+        '<div class="confirm-msg">' + msg + '</div>' +
+        '<div class="confirm-actions">' +
+          '<button type="button" class="btn-secondary" id="confCancelar">Cancelar</button>' +
+          '<button type="button" class="btn-primary" id="confOk">' + textoConfirmar + '</button>' +
+        '</div>' +
+      '</div>';
+    shell.appendChild(overlay);
+    overlay.querySelector("#confCancelar").onclick = function () { overlay.remove(); };
+    overlay.querySelector("#confOk").onclick = function () { overlay.remove(); aoConfirmar(); };
+  }
+
+  function mostrarSucesso(msg) {
+    var overlay = document.createElement("div");
+    overlay.className = "success-overlay";
+    overlay.innerHTML =
+      '<div class="success-icon">✓</div>' +
+      '<div class="success-title">Enviado com sucesso</div>' +
+      '<div class="success-msg">' + msg + '</div>';
+    shell.appendChild(overlay);
+    setTimeout(function () {
+      overlay.remove();
+      state.tela = "home";
+      render();
+    }, 1800);
+  }
+
+  // ---------------------------------------------------------------------
+  // picker (bottom sheet) — substitui o <select> nativo do navegador
+  // ---------------------------------------------------------------------
+  function abrirPicker(titulo, opcoes, valorAtual, onEscolher) {
+    var overlay = document.createElement("div");
+    overlay.className = "picker-overlay";
+    overlay.innerHTML =
+      '<div class="picker-sheet">' +
+        '<div class="picker-header"><span>' + titulo + '</span><button class="picker-close">✕</button></div>' +
+        '<div class="picker-search-wrap"><input type="text" placeholder="Buscar…" id="pickerSearch"></div>' +
+        '<div class="picker-list" id="pickerList"></div>' +
+      '</div>';
+    shell.appendChild(overlay);
+    var listEl = overlay.querySelector("#pickerList");
+    var searchEl = overlay.querySelector("#pickerSearch");
+    function renderLista(filtro) {
+      var f = (filtro || "").toLocaleLowerCase("pt-BR");
+      var filtradas = !f ? opcoes : opcoes.filter(function (o) { return o.toLocaleLowerCase("pt-BR").indexOf(f) !== -1; });
+      if (!filtradas.length) { listEl.innerHTML = '<div class="picker-empty">Nenhum resultado</div>'; return; }
+      listEl.innerHTML = filtradas.map(function (o) {
+        return '<button type="button" class="picker-item" data-v="' + o.replace(/"/g, "&quot;") + '">' + o + (o === valorAtual ? " ✓" : "") + '</button>';
+      }).join("");
+      listEl.querySelectorAll(".picker-item").forEach(function (btn) {
+        btn.onclick = function () {
+          onEscolher(btn.getAttribute("data-v"));
+          fechar();
+        };
+      });
+    }
+    function fechar() { overlay.remove(); }
+    overlay.querySelector(".picker-close").onclick = fechar;
+    overlay.onclick = function (e) { if (e.target === overlay) fechar(); };
+    searchEl.oninput = function () { renderLista(searchEl.value); };
+    renderLista("");
+    searchEl.focus();
+  }
+
+  var MESES_PT = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+  function formatarDataBR(iso) {
+    var p = iso.split("-");
+    return p[2] + "/" + p[1] + "/" + p[0];
+  }
+
+  function renderCalGrid(gridEl, labelEl, ano, mes, valorAtual, onPick) {
+    labelEl.textContent = MESES_PT[mes] + " " + ano;
+    var primeiro = new Date(ano, mes, 1);
+    var offset = primeiro.getDay();
+    var diasNoMes = new Date(ano, mes + 1, 0).getDate();
+    var hojeStr = new Date().toISOString().slice(0, 10);
+    var html = "";
+    for (var i = 0; i < offset; i++) html += "<span></span>";
+    for (var d = 1; d <= diasNoMes; d++) {
+      var dstr = ano + "-" + String(mes + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+      var cls = "cal-day" + (dstr === hojeStr ? " today" : "") + (dstr === valorAtual ? " selected" : "");
+      html += '<button type="button" class="' + cls + '" data-d="' + dstr + '">' + d + '</button>';
+    }
+    gridEl.innerHTML = html;
+    gridEl.querySelectorAll(".cal-day").forEach(function (btn) {
+      btn.onclick = function () { onPick(btn.getAttribute("data-d")); };
+    });
+  }
+
+  function abrirPickerData(valorAtual, onEscolher) {
+    var base = valorAtual ? new Date(valorAtual + "T00:00:00") : new Date();
+    var viewYear = base.getFullYear(), viewMonth = base.getMonth();
+    var overlay = document.createElement("div");
+    overlay.className = "picker-overlay";
+    overlay.innerHTML =
+      '<div class="picker-sheet">' +
+        '<div class="picker-header"><span>Selecionar data</span><button class="picker-close">✕</button></div>' +
+        '<div class="cal-nav"><button type="button" id="calPrev">‹</button><span id="calLabel"></span><button type="button" id="calNext">›</button></div>' +
+        '<div class="cal-weekdays"><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span></div>' +
+        '<div class="cal-grid" id="calGrid"></div>' +
+      '</div>';
+    shell.appendChild(overlay);
+    var gridEl = overlay.querySelector("#calGrid");
+    var labelEl = overlay.querySelector("#calLabel");
+    function fechar() { overlay.remove(); }
+    function desenhar() {
+      renderCalGrid(gridEl, labelEl, viewYear, viewMonth, valorAtual, function (dstr) { onEscolher(dstr); fechar(); });
+    }
+    overlay.querySelector(".picker-close").onclick = fechar;
+    overlay.onclick = function (e) { if (e.target === overlay) fechar(); };
+    overlay.querySelector("#calPrev").onclick = function () { viewMonth--; if (viewMonth < 0) { viewMonth = 11; viewYear--; } desenhar(); };
+    overlay.querySelector("#calNext").onclick = function () { viewMonth++; if (viewMonth > 11) { viewMonth = 0; viewYear++; } desenhar(); };
+    desenhar();
+  }
+
+  function abrirPickerHora(valorAtual, onEscolher) {
+    var partes = (valorAtual || "").split(":");
+    var hSel = partes[0] || null, mSel = partes[1] || null;
+    var horas = []; for (var h = 0; h < 24; h++) horas.push(String(h).padStart(2, "0"));
+    var minutos = []; for (var m = 0; m < 60; m += 5) minutos.push(String(m).padStart(2, "0"));
+    var overlay = document.createElement("div");
+    overlay.className = "picker-overlay";
+    overlay.innerHTML =
+      '<div class="picker-sheet">' +
+        '<div class="picker-header"><span>Selecionar horário</span><button class="picker-close">✕</button></div>' +
+        '<div class="time-cols">' +
+          '<div class="time-col" id="colH">' + horas.map(function (hh) { return '<button type="button" data-h="' + hh + '" class="' + (hh === hSel ? "selected" : "") + '">' + hh + '</button>'; }).join("") + '</div>' +
+          '<div class="time-col" id="colM">' + minutos.map(function (mm) { return '<button type="button" data-m="' + mm + '" class="' + (mm === mSel ? "selected" : "") + '">' + mm + '</button>'; }).join("") + '</div>' +
+        '</div>' +
+        '<div class="time-footer"><button type="button" class="btn-primary" id="timeConfirmar">Confirmar</button></div>' +
+      '</div>';
+    shell.appendChild(overlay);
+    function fechar() { overlay.remove(); }
+    overlay.querySelector(".picker-close").onclick = fechar;
+    overlay.onclick = function (e) { if (e.target === overlay) fechar(); };
+    overlay.querySelectorAll("#colH button").forEach(function (b) {
+      b.onclick = function () { overlay.querySelectorAll("#colH button").forEach(function (x) { x.classList.remove("selected"); }); b.classList.add("selected"); hSel = b.getAttribute("data-h"); };
+    });
+    overlay.querySelectorAll("#colM button").forEach(function (b) {
+      b.onclick = function () { overlay.querySelectorAll("#colM button").forEach(function (x) { x.classList.remove("selected"); }); b.classList.add("selected"); mSel = b.getAttribute("data-m"); };
+    });
+    overlay.querySelector("#timeConfirmar").onclick = function () {
+      onEscolher((hSel || "00") + ":" + (mSel || "00"));
+      fechar();
+    };
+    setTimeout(function () {
+      var selH = overlay.querySelector("#colH .selected"); if (selH) selH.scrollIntoView({ block: "center" });
+      var selM = overlay.querySelector("#colM .selected"); if (selM) selM.scrollIntoView({ block: "center" });
+    }, 30);
+  }
+
+  function opcoesDoCampo(c) {
+    if (c.dynamic === "municipios") {
+      var estado = visitaAtual().dados.estado;
+      if (!estado || !MUNICIPIOS_POR_ESTADO[estado]) return [];
+      return MUNICIPIOS_POR_ESTADO[estado];
+    }
+    return c.opts || [];
+  }
+
+  function calcularPontuacao(visita) {
+    var d = visita.dados;
+    var total = (d.score_area || 0) + (d.score_interesse || 0) + (d.score_logistica || 0) + (d.score_producao || 0) + (d.score_ambiental || 0);
+    var classe = total >= 80 ? { l: "Ótima", cls: "resumo-otima" } : total >= 70 ? { l: "Boa", cls: "resumo-boa" } : { l: "Ruim", cls: "resumo-ruim" };
+    return { total: total, label: classe.l, cls: classe.cls };
+  }
+
+  function resumoPontuacaoHtml(visita) {
+    var r = calcularPontuacao(visita);
+    return '<div class="resumo-pontuacao ' + r.cls + '" id="resumoPontuacao">' +
+      '<span class="resumo-total">' + r.total + '<small>/100</small></span>' +
+      '<span class="resumo-label">Viabilidade ' + r.label + '</span>' +
+      '</div>';
+  }
+
+  function atualizarResumoPontuacao() {
+    var el = document.getElementById("resumoPontuacao");
+    if (!el) return;
+    var r = calcularPontuacao(visitaAtual());
+    el.className = "resumo-pontuacao " + r.cls;
+    el.innerHTML = '<span class="resumo-total">' + r.total + '<small>/100</small></span><span class="resumo-label">Viabilidade ' + r.label + '</span>';
+  }
+
+  function renderCampo(c) {
+    var visita = visitaAtual();
+    var v = visita.dados[c.k];
+    if (!campoVisivel(c)) return "";
+    var html = '<div class="field">';
+    if (c.t !== "toggle" && c.t !== "photo" && c.t !== "gps" && c.t !== "choice2" && c.t !== "resumo") html += '<label>' + c.l + '</label>';
+    if (c.t === "text") {
+      html += '<input type="text" placeholder="' + (c.ph || "") + '" value="' + (v || "").toString().replace(/"/g, "&quot;") + '" data-k="' + c.k + '"' + (c.mask ? ' data-mask="' + c.mask + '"' : '') + '>';
+    } else if (c.t === "doc") {
+      var tipo = visita.dados.tipo_documento;
+      var ph = tipo === "CNPJ" ? "00.000.000/0000-00" : tipo === "CPF" ? "000.000.000-00" : "selecione o tipo acima";
+      html += '<input type="text" inputmode="numeric" placeholder="' + ph + '" value="' + (v || "").toString().replace(/"/g, "&quot;") + '" data-k="' + c.k + '"' + (tipo ? "" : " disabled") + '>';
+      if (!tipo) html += '<div class="field-note">Escolha CPF ou CNPJ acima para liberar a máscara.</div>';
+    } else if (c.t === "number") {
+      html += '<div class="unit-wrap"><input type="number" inputmode="decimal" value="' + (v == null ? "" : v) + '" data-k="' + c.k + '">' + (c.u ? '<span class="unit-suffix">' + c.u + '</span>' : '') + '</div>';
+    } else if (c.t === "date") {
+      html += '<button type="button" class="picker-btn" data-k="' + c.k + '"><span class="' + (v ? "" : "ph") + '">' + (v ? formatarDataBR(v) : "Selecionar data") + '</span><span class="chev">›</span></button>';
+    } else if (c.t === "time") {
+      html += '<button type="button" class="picker-btn" data-k="' + c.k + '"><span class="' + (v ? "" : "ph") + '">' + (v || "Selecionar horário") + '</span><span class="chev">›</span></button>';
+    } else if (c.t === "select") {
+      var op = opcoesDoCampo(c);
+      var travado = c.dynamic === "municipios" && !visita.dados.estado;
+      html += '<button type="button" class="picker-btn" data-k="' + c.k + '"' + (travado ? " disabled" : "") + '>' +
+        '<span class="' + (v ? "" : "ph") + '">' + (v || (travado ? "Selecione o estado primeiro" : "Selecionar…")) + '</span><span class="chev">›</span></button>';
+    } else if (c.t === "textarea") {
+      html += '<textarea data-k="' + c.k + '">' + (v || "") + '</textarea>';
+    } else if (c.t === "toggle") {
+      html += '<label>' + c.l + '</label><div class="toggle-group">' +
+        '<button class="toggle-btn ' + (v === true ? "active-yes" : "") + '" data-k="' + c.k + '" data-v="true">Sim</button>' +
+        '<button class="toggle-btn ' + (v === false ? "active-no" : "") + '" data-k="' + c.k + '" data-v="false">Não</button>' +
+        '</div>';
+    } else if (c.t === "choice2") {
+      html += '<label>' + c.l + '</label><div class="toggle-group">' +
+        c.opts.map(function (o) {
+          return '<button class="toggle-btn ' + (v === o ? "active-pick" : "") + '" data-k="' + c.k + '" data-v="' + o + '">' + o + '</button>';
+        }).join("") + '</div>';
+    } else if (c.t === "range") {
+      var val = v == null ? 0 : v;
+      html += '<div class="range-row"><input type="range" min="0" max="' + c.max + '" step="1" value="' + val + '" data-k="' + c.k + '">' +
+        '<span class="range-val">' + val + '/' + c.max + '</span></div>';
+    } else if (c.t === "photo") {
+      var fotoBlob = visita.fotos[c.k];
+      var has = !!fotoBlob;
+      var thumbUrl = has ? URL.createObjectURL(fotoBlob) : null;
+      html += '<div class="photo-slot" data-k="' + c.k + '">' +
+        '<div class="thumb"' + (has ? ' style="background-image:url(' + thumbUrl + ')"' : '') + '">' + (has ? "" : "＋") + '</div>' +
+        '<div class="ptext">' + c.l + (has ? " — capturada" : " — toque para tirar foto") + '</div>' +
+        '<input type="file" accept="image/*" capture="environment" data-k="' + c.k + '" style="display:none">' +
+        '</div>';
+    } else if (c.t === "gps") {
+      html += renderGpsBox(c);
+    } else if (c.t === "resumo") {
+      html += resumoPontuacaoHtml(visita);
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function renderGpsBox(c) {
+    var visita = visitaAtual();
+    var g = visita.gps_visita;
+    var inseguro = typeof window.isSecureContext === "boolean" && window.isSecureContext === false;
+    var html = '<label>' + c.l + '</label><div class="gps-box">' +
+      '<button class="btn-secondary" id="btnGps">' + (g ? "Capturar novamente" : "Capturar localização") + '</button>';
+    if (inseguro) {
+      html += '<div class="gps-warning">Este arquivo foi aberto fora de um endereço seguro (https). Alguns navegadores bloqueiam o GPS nessa condição — a versão publicada do app não terá esse problema.</div>';
+    }
+    if (g) {
+      html += '<div class="gps-success">✓ Localização capturada e válida</div>' +
+        '<div class="gps-result"><b>' + g.lat.toFixed(5) + ', ' + g.lon.toFixed(5) + '</b><br>precisão ±' + Math.round(g.acc) + ' m · ' + new Date(g.quando).toLocaleTimeString("pt-BR") + '</div>';
+    }
+    html += '<div class="gps-error" id="gpsErro"></div></div>';
+    return html;
+  }
+
+  function renderSecaoAtual() {
+    if (state.tela !== "secaoDetalhe") return;
+    var secao = SECOES.filter(function (s) { return s.id === state.secaoAtual; })[0];
+    var html = "";
+    secao.campos.forEach(function (c) { html += renderCampo(c); });
+    content.innerHTML = html;
+    wireCampoEvents();
+    footerBar.innerHTML = '<button class="btn-primary" id="voltarSecoes">Voltar às seções</button>';
+    document.getElementById("voltarSecoes").onclick = function () { state.tela = "secoes"; render(); };
+  }
+
+  function wireCampoEvents() {
+    var visita = visitaAtual();
+
+    content.querySelectorAll('input[type=text]:not([data-k=cpf_cnpj]):not([data-mask]), input[type=number], textarea').forEach(function (el) {
+      el.oninput = function () {
+        var k = el.getAttribute("data-k");
+        var val = el.type === "number" ? (el.value === "" ? null : Number(el.value)) : el.value;
+        setValSoft(k, val);
+      };
+    });
+
+    var docInput = content.querySelector('input[data-k=cpf_cnpj]');
+    if (docInput) {
+      docInput.oninput = function () {
+        var tipo = visita.dados.tipo_documento;
+        var masked = aplicarMascaraDoc(docInput.value, tipo);
+        docInput.value = masked;
+        visita.dados.cpf_cnpj = masked;
+        persistir(visita);
+        showToast();
+      };
+    }
+
+    content.querySelectorAll('input[data-mask=tel]').forEach(function (el) {
+      el.oninput = function () {
+        var masked = aplicarMascaraTelefone(el.value);
+        el.value = masked;
+        visita.dados[el.getAttribute("data-k")] = masked;
+        persistir(visita);
+        showToast();
+      };
+    });
+
+    content.querySelectorAll(".picker-btn").forEach(function (btn) {
+      if (btn.disabled) return;
+      var k = btn.getAttribute("data-k");
+      var campo = null;
+      SECOES.forEach(function (s) { s.campos.forEach(function (c) { if (c.k === k) campo = c; }); });
+      btn.onclick = function () {
+        if (campo.t === "date") {
+          abrirPickerData(visita.dados[k], function (val) { setVal(k, val); });
+        } else if (campo.t === "time") {
+          abrirPickerHora(visita.dados[k], function (val) { setVal(k, val); });
+        } else {
+          var opts = opcoesDoCampo(campo);
+          abrirPicker(campo.l, opts, visita.dados[k], function (val) { setVal(k, val); });
+        }
+      };
+    });
+
+    content.querySelectorAll(".toggle-btn").forEach(function (el) {
+      el.onclick = function () {
+        var k = el.getAttribute("data-k");
+        var raw = el.getAttribute("data-v");
+        var val = raw === "true" ? true : raw === "false" ? false : raw;
+        setVal(k, val);
+      };
+    });
+
+    content.querySelectorAll("input[type=range]").forEach(function (el) {
+      el.oninput = function () {
+        visita.dados[el.getAttribute("data-k")] = Number(el.value);
+        el.nextElementSibling.textContent = el.value + "/" + el.max;
+        atualizarResumoPontuacao();
+        persistir(visita);
+        showToast();
+      };
+    });
+
+    content.querySelectorAll(".photo-slot").forEach(function (el) {
+      var input = el.querySelector("input[type=file]");
+      el.onclick = function () { input.click(); };
+      input.onchange = function () {
+        if (!input.files || !input.files[0]) return;
+        var k = input.getAttribute("data-k");
+        // guarda o arquivo de verdade (Blob), não uma URL temporária —
+        // isso é o que permite a foto sobreviver a um recarregamento.
+        visita.fotos[k] = input.files[0];
+        persistir(visita);
+        showToast();
+        renderSecaoAtual();
+      };
+    });
+
+    var btnGps = document.getElementById("btnGps");
+    if (btnGps) {
+      btnGps.onclick = function () {
+        var erroEl = document.getElementById("gpsErro");
+        erroEl.textContent = "";
+        btnGps.textContent = "Obtendo localização…";
+        if (!("geolocation" in navigator)) {
+          erroEl.textContent = "Este dispositivo/navegador não expõe a API de localização.";
+          btnGps.textContent = "Capturar localização";
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(
+          function (pos) {
+            visita.gps_visita = { lat: pos.coords.latitude, lon: pos.coords.longitude, acc: pos.coords.accuracy, quando: Date.now() };
+            persistir(visita);
+            showToast();
+            renderSecaoAtual();
+            wireCampoEvents();
+          },
+          function (err) {
+            var msgs = { 1: "Permissão de localização negada. Verifique as permissões do site/app nas configurações do navegador.", 2: "Não foi possível determinar a posição agora (sinal de GPS fraco). Tente novamente ao ar livre.", 3: "Tempo esgotado tentando obter a localização. Tente novamente." };
+            erroEl.textContent = msgs[err.code] || "Não foi possível obter a localização agora.";
+            btnGps.textContent = "Capturar localização";
+          },
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        );
+      };
+    }
+  }
+
+  function setValSoft(k, v) {
+    var visita = visitaAtual();
+    visita.dados[k] = v;
+    if (k === "nome_fazenda" && v) visita.fazenda = v;
+    persistir(visita);
+    showToast();
+    var secao = SECOES.filter(function (s) { return s.id === state.secaoAtual; })[0];
+    var dependentes = secao.campos.filter(function (c) { return c.showIf === k; });
+    if (dependentes.length) renderSecaoAtual();
+  }
+
+  function render() {
+    renderBar();
+    if (state.tela === "home") renderHome();
+    else if (state.tela === "secoes") renderSecoes();
+    else renderSecaoAtual();
+  }
+
+  window.addEventListener("online", renderBar);
+  window.addEventListener("offline", renderBar);
+
+  // ---------------------------------------------------------------------
+  // inicialização: abre o banco, carrega o que já foi salvo. Se for a
+  // primeira vez (banco vazio), semeia as 2 visitas de demonstração —
+  // e já grava elas no banco, pra virarem dados reais dali pra frente.
+  // ---------------------------------------------------------------------
+  abrirBanco().then(function (banco) {
+    db = banco;
+    return carregarTodasDoBanco();
+  }).then(function (salvas) {
+    if (salvas && salvas.length) {
+      visitas = salvas.sort(function (a, b) { return b.id - a.id; });
+      proximoId = salvas.reduce(function (max, v) { return Math.max(max, v.id); }, 0) + 1;
+      visitaAtualId = visitas.length ? visitas[0].id : 1;
+    } else {
+      visitas.forEach(function (v) { persistir(v); });
+    }
+    render();
+  }).catch(function () {
+    render();
+  });
+})();
+</script>
+<script>
+  // Registra o Service Worker (só funciona em HTTPS ou localhost — em
+  // file:// ou dentro de visualizadores como o do WhatsApp, isso falha
+  // silenciosamente, o que é esperado e não quebra o resto do app).
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("./sw.js").catch(function (err) {
+        console.warn("Service worker não registrado (normal em file:// ou sem HTTPS):", err);
+      });
+    });
+  }
+</script>
+</body>
+</html>
