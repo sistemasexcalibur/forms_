@@ -191,6 +191,7 @@
 
   .success-overlay { position: fixed; inset: 0; max-width: 440px; margin: 0 auto; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 40; text-align: center; padding: 24px; }
   .success-icon { width: 62px; height: 62px; border-radius: 99px; background: var(--green-100); color: var(--green-600); display: flex; align-items: center; justify-content: center; font-size: 30px; margin-bottom: 16px; animation: successPop 0.3s ease; }
+  .pending-icon { width: 62px; height: 62px; border-radius: 99px; background: var(--amber-100); color: var(--amber-700); display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 16px; animation: successPop 0.3s ease; }
   @keyframes successPop { from { transform: scale(0.55); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   .success-title { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
   .success-msg { font-size: 13.5px; color: var(--text-secondary); max-width: 280px; }
@@ -210,6 +211,18 @@
   <div class="save-toast" id="toast">Salvo no dispositivo</div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  // Config do Supabase — a chave pública é feita pra ficar exposta no
+  // código do cliente (é protegida por Row Level Security no banco, não
+  // por sigilo). Nunca coloque a chave "secret" aqui.
+  var SUPABASE_URL = "https://xtwjvdwolxkkgecaamaf.supabase.co";
+  var SUPABASE_PUBLISHABLE_KEY = "sb_publishable_BSTRWaomYin2vankhrJyXg_iAr4Wr8X";
+  var supabaseClient = (typeof supabase !== "undefined")
+    ? supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
+    : null;
+</script>
+
 <script>
 
 (function () {
@@ -221,12 +234,9 @@
   const ESTADOS_BR = ["Acre","Alagoas","Amapá","Amazonas","Bahia","Ceará","Distrito Federal","Espírito Santo","Goiás","Maranhão","Mato Grosso","Mato Grosso do Sul","Minas Gerais","Paraná","Paraíba","Pará","Pernambuco","Piauí","Rio Grande do Norte","Rio Grande do Sul","Rio de Janeiro","Rondônia","Roraima","Santa Catarina","Sergipe","São Paulo","Tocantins"];
   
 
-  var proximoId = 3;
-  var visitas = [
-    { id: 1, fazenda: "Santa Edwirges", municipio: "Marumbi PR", status: "sincronizado", dados: { data_visita: "2026-06-18", especialista: "Paulo Victor Ornellas" }, fotos: {}, gps_visita: null },
-    { id: 2, fazenda: "Monte Carmelo", municipio: "Marumbi PR", status: "pendente", dados: { data_visita: "2026-06-19" }, fotos: {}, gps_visita: null }
-  ];
-  var visitaAtualId = 1;
+  var proximoId = 1;
+  var visitas = [];
+  var visitaAtualId = null;
   function visitaAtual() { return visitas.filter(function (v) { return v.id === visitaAtualId; })[0]; }
 
   // ---------------------------------------------------------------------
@@ -279,6 +289,46 @@
         pedido.onsuccess = function () { resolve(pedido.result || []); };
         pedido.onerror = function () { resolve([]); };
       } catch (e) { resolve([]); }
+    });
+  }
+
+  // ---------------------------------------------------------------------
+  // Sincronização com o Supabase — chama a função sincronizar_visita(jsonb)
+  // que grava nas 8 tabelas relacionadas numa transação só, no servidor.
+  // ---------------------------------------------------------------------
+  function gerarUUID() {
+    if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+      var r = (Math.random() * 16) | 0, v = c === "x" ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
+
+  function montarPayloadSync(visita) {
+    var payload = {};
+    Object.keys(visita.dados).forEach(function (k) { payload[k] = visita.dados[k]; });
+    payload.uuid_dispositivo = visita.uuid_dispositivo;
+    payload.gps_visita = visita.gps_visita || null;
+    return payload;
+  }
+
+  function sincronizarVisita(visita) {
+    if (!supabaseClient) return Promise.reject(new Error("Cliente Supabase não carregado."));
+    if (!visita.uuid_dispositivo) visita.uuid_dispositivo = gerarUUID();
+    return supabaseClient.rpc("sincronizar_visita", { p: montarPayloadSync(visita) });
+  }
+
+  function tentarSincronizarPendentes() {
+    var online = typeof navigator !== "undefined" && navigator.onLine !== false;
+    if (!online || !supabaseClient) return;
+    visitas.filter(function (v) { return v.status === "pendente"; }).forEach(function (v) {
+      sincronizarVisita(v).then(function (resp) {
+        if (!resp.error) {
+          v.status = "sincronizado";
+          persistir(v);
+          if (state.tela === "home") renderHome();
+        }
+      }).catch(function () { /* continua pendente — tenta de novo na próxima reconexão */ });
     });
   }
 
@@ -498,7 +548,7 @@
     footerBar.innerHTML = '<button class="btn-primary" id="novaVisita">+ Nova visita</button>';
     document.getElementById("novaVisita").onclick = function () {
       var id = proximoId++;
-      var nova = { id: id, fazenda: "Nova visita", municipio: "", status: "rascunho", dados: {}, fotos: {}, gps_visita: null };
+      var nova = { id: id, fazenda: "Nova visita", municipio: "", status: "rascunho", dados: {}, fotos: {}, gps_visita: null, uuid_dispositivo: gerarUUID() };
       visitas.unshift(nova);
       persistir(nova);
       visitaAtualId = id;
@@ -529,11 +579,27 @@
       var p = progressoGeral();
       function enviar() {
         var online = typeof navigator !== "undefined" && navigator.onLine !== false;
-        visita.status = online ? "sincronizado" : "pendente";
-        persistir(visita);
-        mostrarSucesso(online
-          ? "A visita foi enviada e sincronizada com o banco de dados."
-          : "A visita foi salva no dispositivo e entrará na fila de sincronização assim que a internet voltar.");
+        if (!online || !supabaseClient) {
+          visita.status = "pendente";
+          persistir(visita);
+          mostrarPendente("A visita foi salva no dispositivo e entrará na fila de sincronização assim que a internet voltar.");
+          return;
+        }
+        sincronizarVisita(visita).then(function (resp) {
+          if (resp.error) {
+            visita.status = "pendente";
+            persistir(visita);
+            mostrarPendente("Não foi possível sincronizar agora (" + resp.error.message + "). A visita ficou salva no dispositivo e o app tenta de novo automaticamente.");
+          } else {
+            visita.status = "sincronizado";
+            persistir(visita);
+            mostrarSucesso("A visita foi enviada e sincronizada com o banco de dados.");
+          }
+        }).catch(function () {
+          visita.status = "pendente";
+          persistir(visita);
+          mostrarPendente("Sem conexão com o servidor agora. A visita ficou salva no dispositivo e o app tenta de novo automaticamente.");
+        });
       }
       if (p.ok < p.total) {
         abrirConfirmacao(
@@ -621,6 +687,21 @@
       state.tela = "home";
       render();
     }, 1800);
+  }
+
+  function mostrarPendente(msg) {
+    var overlay = document.createElement("div");
+    overlay.className = "success-overlay";
+    overlay.innerHTML =
+      '<div class="pending-icon">↻</div>' +
+      '<div class="success-title">Salvo — será enviado depois</div>' +
+      '<div class="success-msg">' + msg + '</div>';
+    shell.appendChild(overlay);
+    setTimeout(function () {
+      overlay.remove();
+      state.tela = "home";
+      render();
+    }, 2200);
   }
 
   // ---------------------------------------------------------------------
@@ -998,13 +1079,11 @@
     else renderSecaoAtual();
   }
 
-  window.addEventListener("online", renderBar);
+  window.addEventListener("online", function () { renderBar(); tentarSincronizarPendentes(); });
   window.addEventListener("offline", renderBar);
 
   // ---------------------------------------------------------------------
-  // inicialização: abre o banco, carrega o que já foi salvo. Se for a
-  // primeira vez (banco vazio), semeia as 2 visitas de demonstração —
-  // e já grava elas no banco, pra virarem dados reais dali pra frente.
+  // inicialização: abre o banco local e carrega o que já foi salvo antes.
   // ---------------------------------------------------------------------
   abrirBanco().then(function (banco) {
     db = banco;
@@ -1013,11 +1092,10 @@
     if (salvas && salvas.length) {
       visitas = salvas.sort(function (a, b) { return b.id - a.id; });
       proximoId = salvas.reduce(function (max, v) { return Math.max(max, v.id); }, 0) + 1;
-      visitaAtualId = visitas.length ? visitas[0].id : 1;
-    } else {
-      visitas.forEach(function (v) { persistir(v); });
+      visitaAtualId = visitas.length ? visitas[0].id : null;
     }
     render();
+    tentarSincronizarPendentes();
   }).catch(function () {
     render();
   });
