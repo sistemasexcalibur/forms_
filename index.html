@@ -304,18 +304,79 @@
     });
   }
 
-  function montarPayloadSync(visita) {
+  // ---------------------------------------------------------------------
+  // Compressão de foto no dispositivo — reduz de ~3-8MB (direto da câmera)
+  // pra ~150-400KB, sem perda visível pra documentação de campo. Essencial
+  // pra sincronizar em 3G fraco.
+  // ---------------------------------------------------------------------
+  function comprimirImagem(arquivo, dimensaoMax, qualidade) {
+    return new Promise(function (resolve, reject) {
+      if (typeof Image === "undefined" || typeof document.createElement("canvas").getContext !== "function") {
+        resolve(arquivo);
+        return;
+      }
+      var url = URL.createObjectURL(arquivo);
+      var img = new Image();
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        var escala = Math.min(1, dimensaoMax / Math.max(img.width, img.height));
+        var canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(img.width * escala));
+        canvas.height = Math.max(1, Math.round(img.height * escala));
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(function (blob) {
+          if (blob) resolve(blob); else reject(new Error("Falha ao comprimir imagem"));
+        }, "image/jpeg", qualidade);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("Falha ao carregar imagem")); };
+      img.src = url;
+    });
+  }
+
+  // ---------------------------------------------------------------------
+  // Upload das fotos pro bucket "evidencias" do Storage. Cada foto falha
+  // de forma independente — se uma não subir, as outras e o resto dos
+  // dados da visita seguem normalmente.
+  // ---------------------------------------------------------------------
+  var TIPO_EVIDENCIA_MAP = {
+    foto_entrada: "entrada_fazenda",
+    foto_sede: "sede",
+    foto_area_disponivel: "area_disponivel",
+    foto_plantio: "plantio_existente",
+    foto_estradas: "estradas_acesso",
+    foto_panoramica: "foto_panoramica"
+  };
+
+  function enviarFotos(visita) {
+    var chaves = Object.keys(visita.fotos).filter(function (k) { return !!visita.fotos[k]; });
+    if (!chaves.length || !supabaseClient) return Promise.resolve([]);
+    var envios = chaves.map(function (k) {
+      var tipo = TIPO_EVIDENCIA_MAP[k];
+      if (!tipo) return Promise.resolve(null);
+      var caminho = visita.uuid_dispositivo + "/" + tipo + ".jpg";
+      return supabaseClient.storage.from("evidencias").upload(caminho, visita.fotos[k], { upsert: true, contentType: "image/jpeg" })
+        .then(function (res) { return res.error ? null : { tipo: tipo, path: caminho }; })
+        .catch(function () { return null; });
+    });
+    return Promise.all(envios).then(function (resultados) { return resultados.filter(Boolean); });
+  }
+
+  function montarPayloadSync(visita, evidencias) {
     var payload = {};
     Object.keys(visita.dados).forEach(function (k) { payload[k] = visita.dados[k]; });
     payload.uuid_dispositivo = visita.uuid_dispositivo;
     payload.gps_visita = visita.gps_visita || null;
+    payload.evidencias = evidencias || [];
     return payload;
   }
 
   function sincronizarVisita(visita) {
     if (!supabaseClient) return Promise.reject(new Error("Cliente Supabase não carregado."));
     if (!visita.uuid_dispositivo) visita.uuid_dispositivo = gerarUUID();
-    return supabaseClient.rpc("sincronizar_visita", { p: montarPayloadSync(visita) });
+    return enviarFotos(visita).then(function (evidencias) {
+      return supabaseClient.rpc("sincronizar_visita", { p: montarPayloadSync(visita, evidencias) });
+    });
   }
 
   function tentarSincronizarPendentes() {
@@ -1022,12 +1083,23 @@
       input.onchange = function () {
         if (!input.files || !input.files[0]) return;
         var k = input.getAttribute("data-k");
-        // guarda o arquivo de verdade (Blob), não uma URL temporária —
-        // isso é o que permite a foto sobreviver a um recarregamento.
-        visita.fotos[k] = input.files[0];
-        persistir(visita);
-        showToast();
-        renderSecaoAtual();
+        var thumbEl = el.querySelector(".thumb");
+        thumbEl.textContent = "…";
+        comprimirImagem(input.files[0], 1600, 0.75).then(function (blobComprimido) {
+          // guarda o arquivo já comprimido (Blob), não uma URL temporária —
+          // isso é o que permite a foto sobreviver a um recarregamento, e
+          // deixa o upload rápido mesmo com sinal fraco em campo.
+          visita.fotos[k] = blobComprimido;
+          persistir(visita);
+          showToast();
+          renderSecaoAtual();
+        }).catch(function () {
+          // se a compressão falhar por algum motivo, usa o arquivo original
+          visita.fotos[k] = input.files[0];
+          persistir(visita);
+          showToast();
+          renderSecaoAtual();
+        });
       };
     });
 
