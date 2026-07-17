@@ -368,16 +368,30 @@
 
   function enviarFotos(visita) {
     var chaves = Object.keys(visita.fotos).filter(function (k) { return !!visita.fotos[k]; });
-    if (!chaves.length || !supabaseClient) return Promise.resolve([]);
+    if (!chaves.length || !supabaseClient) return Promise.resolve({ enviadas: [], falhas: [] });
     var envios = chaves.map(function (k) {
       var tipo = TIPO_EVIDENCIA_MAP[k];
-      if (!tipo) return Promise.resolve(null);
+      if (!tipo) return Promise.resolve({ ok: false, k: k, tipo: k, erro: "tipo de evidência sem mapeamento" });
       var caminho = visita.uuid_dispositivo + "/" + tipo + ".jpg";
       return supabaseClient.storage.from("evidencias").upload(caminho, visita.fotos[k], { upsert: true, contentType: "image/jpeg" })
-        .then(function (res) { return res.error ? null : { tipo: tipo, path: caminho }; })
-        .catch(function () { return null; });
+        .then(function (res) {
+          if (res.error) {
+            console.warn("Falha ao enviar foto '" + tipo + "':", res.error.message || res.error);
+            return { ok: false, k: k, tipo: tipo, erro: res.error.message || String(res.error) };
+          }
+          return { ok: true, k: k, tipo: tipo, path: caminho };
+        })
+        .catch(function (err) {
+          console.warn("Erro de rede ao enviar foto '" + tipo + "':", err);
+          return { ok: false, k: k, tipo: tipo, erro: err && err.message ? err.message : "erro de rede" };
+        });
     });
-    return Promise.all(envios).then(function (resultados) { return resultados.filter(Boolean); });
+    return Promise.all(envios).then(function (resultados) {
+      return {
+        enviadas: resultados.filter(function (r) { return r.ok; }).map(function (r) { return { tipo: r.tipo, path: r.path }; }),
+        falhas: resultados.filter(function (r) { return !r.ok; })
+      };
+    });
   }
 
   function montarPayloadSync(visita, evidencias) {
@@ -392,18 +406,23 @@
   function sincronizarVisita(visita) {
     if (!supabaseClient) return Promise.reject(new Error("Cliente Supabase não carregado."));
     if (!visita.uuid_dispositivo) visita.uuid_dispositivo = gerarUUID();
-    return enviarFotos(visita).then(function (evidencias) {
-      return supabaseClient.rpc("sincronizar_visita", { p: montarPayloadSync(visita, evidencias) });
+    return enviarFotos(visita).then(function (resultadoFotos) {
+      return supabaseClient.rpc("sincronizar_visita", { p: montarPayloadSync(visita, resultadoFotos.enviadas) })
+        .then(function (resp) {
+          resp.falhasFotos = resultadoFotos.falhas;
+          return resp;
+        });
     });
   }
 
   function tentarSincronizarPendentes() {
     var online = typeof navigator !== "undefined" && navigator.onLine !== false;
     if (!online || !supabaseClient) return;
-    visitas.filter(function (v) { return v.status === "pendente"; }).forEach(function (v) {
+    visitas.filter(function (v) { return v.status === "pendente" || (v.fotosPendentes && v.fotosPendentes.length); }).forEach(function (v) {
       sincronizarVisita(v).then(function (resp) {
         if (!resp.error) {
           v.status = "sincronizado";
+          v.fotosPendentes = (resp.falhasFotos || []).map(function (f) { return f.k; });
           persistir(v);
           if (state.tela === "home") renderHome();
         }
@@ -684,9 +703,16 @@
             visita.status = "pendente";
             persistir(visita);
             mostrarPendente("Não foi possível sincronizar agora (" + resp.error.message + "). A visita ficou salva no dispositivo e o app tenta de novo automaticamente.");
+            return;
+          }
+          visita.status = "sincronizado";
+          var falhas = resp.falhasFotos || [];
+          visita.fotosPendentes = falhas.map(function (f) { return f.k; });
+          persistir(visita);
+          if (falhas.length) {
+            var lista = falhas.map(function (f) { return f.tipo; }).join(", ");
+            mostrarPendente("Os dados foram sincronizados, mas " + falhas.length + " foto(s) não subiram agora (" + lista + "). O app tenta reenviar essas fotos automaticamente.");
           } else {
-            visita.status = "sincronizado";
-            persistir(visita);
             mostrarSucesso("A visita foi enviada e sincronizada com o banco de dados.");
           }
         }).catch(function () {
