@@ -124,6 +124,8 @@
   .range-row input[type="range"] { flex: 1; }
   .range-val { font-family: var(--mono); font-size: 14px; min-width: 52px; text-align: right; }
   .photo-slot { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px dashed var(--border-strong); border-radius: 10px; cursor: pointer; }
+  .photo-slot-enviada .thumb { background: var(--green-100); color: var(--green-600); font-size: 18px; }
+  .photo-slot-enviada { border-style: solid; border-color: var(--green-600); }
   .photo-slot .thumb { width: 44px; height: 44px; border-radius: 8px; background: var(--surface-2); flex-shrink: 0; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--text-muted); }
   .photo-slot .ptext { font-size: 13.5px; color: var(--text-secondary); }
 
@@ -365,6 +367,8 @@
     foto_estradas: "estradas_acesso",
     foto_panoramica: "foto_panoramica"
   };
+  var TIPO_EVIDENCIA_MAP_REVERSO = {};
+  Object.keys(TIPO_EVIDENCIA_MAP).forEach(function (k) { TIPO_EVIDENCIA_MAP_REVERSO[TIPO_EVIDENCIA_MAP[k]] = k; });
 
   function enviarFotos(visita) {
     var chaves = Object.keys(visita.fotos).filter(function (k) { return !!visita.fotos[k]; });
@@ -428,6 +432,59 @@
         }
       }).catch(function () { /* continua pendente — tenta de novo na próxima reconexão */ });
     });
+  }
+
+  // ---------------------------------------------------------------------
+  // Reconstrói uma visita no formato que o app usa localmente, a partir
+  // do registro "achatado" que vem do banco (função listar_visitas).
+  // ---------------------------------------------------------------------
+  var CAMPOS_FORA_DE_DADOS = { uuid_dispositivo: 1, status_sincronizacao: 1, atualizado_em: 1, gps_visita: 1, evidencias: 1 };
+
+  function reconstruirVisitaDoServidor(registro) {
+    var dados = {};
+    Object.keys(registro).forEach(function (k) {
+      if (CAMPOS_FORA_DE_DADOS[k]) return;
+      if (registro[k] !== null && registro[k] !== undefined) dados[k] = registro[k];
+    });
+    var evidenciasServidor = (registro.evidencias || [])
+      .map(function (e) { return TIPO_EVIDENCIA_MAP_REVERSO[e.tipo]; })
+      .filter(Boolean);
+    return {
+      id: proximoId++,
+      fazenda: registro.nome_fazenda || "Visita recuperada",
+      municipio: registro.municipio || "",
+      status: registro.status_sincronizacao === "sincronizado" ? "sincronizado" : "pendente",
+      dados: dados,
+      fotos: {},
+      gps_visita: registro.gps_visita || null,
+      uuid_dispositivo: registro.uuid_dispositivo,
+      evidenciasServidor: evidenciasServidor,
+      fotosPendentes: []
+    };
+  }
+
+  // ---------------------------------------------------------------------
+  // Busca todas as visitas já sincronizadas no banco e adiciona ao
+  // dispositivo as que ainda não existem localmente — nunca sobrescreve
+  // uma visita que já está no aparelho, pra não perder progresso feito
+  // localmente e ainda não enviado.
+  // ---------------------------------------------------------------------
+  function buscarVisitasDoServidor() {
+    var online = typeof navigator !== "undefined" && navigator.onLine !== false;
+    if (!online || !supabaseClient) return Promise.resolve();
+    return supabaseClient.rpc("listar_visitas").then(function (resp) {
+      if (resp.error || !resp.data) return;
+      var idsLocais = {};
+      visitas.forEach(function (v) { if (v.uuid_dispositivo) idsLocais[v.uuid_dispositivo] = true; });
+      var novas = resp.data.filter(function (r) { return r.uuid_dispositivo && !idsLocais[r.uuid_dispositivo]; });
+      if (!novas.length) return;
+      novas.forEach(function (r) {
+        var nova = reconstruirVisitaDoServidor(r);
+        visitas.push(nova);
+        persistir(nova);
+      });
+      if (state.tela === "home") renderHome();
+    }).catch(function () { /* falha silenciosa — tenta de novo na próxima abertura/reconexão */ });
   }
 
   var SECOES = [
@@ -554,7 +611,7 @@
     secao.campos.forEach(function (c) {
       if (c.t === "gps" || c.t === "resumo") return;
       var v = visita.dados[c.k];
-      if (c.t === "photo") { if (visita.fotos[c.k]) ok++; return; }
+      if (c.t === "photo") { if (visita.fotos[c.k] || (visita.evidenciasServidor && visita.evidenciasServidor.indexOf(c.k) !== -1)) ok++; return; }
       if (c.t === "toggle") { if (v === true || v === false) ok++; return; }
       if (v !== undefined && v !== null && v !== "") ok++;
     });
@@ -1056,10 +1113,13 @@
     } else if (c.t === "photo") {
       var fotoBlob = visita.fotos[c.k];
       var has = !!fotoBlob;
+      var jaEnviada = !has && visita.evidenciasServidor && visita.evidenciasServidor.indexOf(c.k) !== -1;
       var thumbUrl = has ? URL.createObjectURL(fotoBlob) : null;
-      html += '<div class="photo-slot" data-k="' + c.k + '">' +
-        '<div class="thumb"' + (has ? ' style="background-image:url(' + thumbUrl + ')"' : '') + '">' + (has ? "" : "＋") + '</div>' +
-        '<div class="ptext">' + c.l + (has ? " — capturada" : " — toque para tirar foto") + '</div>' +
+      var thumbConteudo = has ? "" : jaEnviada ? "✓" : "＋";
+      var texto = has ? " — capturada" : jaEnviada ? " — já enviada (toque para substituir)" : " — toque para tirar foto";
+      html += '<div class="photo-slot' + (jaEnviada ? " photo-slot-enviada" : "") + '" data-k="' + c.k + '">' +
+        '<div class="thumb"' + (has ? ' style="background-image:url(' + thumbUrl + ')"' : '') + '">' + thumbConteudo + '</div>' +
+        '<div class="ptext">' + c.l + texto + '</div>' +
         '<input type="file" accept="image/*" capture="environment" data-k="' + c.k + '" style="display:none">' +
         '</div>';
     } else if (c.t === "gps") {
@@ -1242,7 +1302,7 @@
     else renderSecaoAtual();
   }
 
-  window.addEventListener("online", function () { renderBar(); tentarSincronizarPendentes(); });
+  window.addEventListener("online", function () { renderBar(); tentarSincronizarPendentes(); buscarVisitasDoServidor(); });
   window.addEventListener("appInstallReady", function () { if (state.tela === "home") renderHome(); });
   window.addEventListener("offline", renderBar);
 
@@ -1260,6 +1320,7 @@
     }
     render();
     tentarSincronizarPendentes();
+    buscarVisitasDoServidor();
   }).catch(function () {
     render();
   });
