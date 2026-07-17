@@ -4,7 +4,7 @@
 // cache sozinho). Sem internet, serve a última versão salva — inclusive
 // numa aba nova, recém-aberta, sem nunca ter sido carregada antes offline.
 
-const CACHE_NAME = "alltech-biomassa-v1";
+const CACHE_NAME = "alltech-biomassa-v2";
 
 const APP_SHELL = [
   "./",
@@ -37,7 +37,7 @@ self.addEventListener("fetch", (event) => {
   if (req.method !== "GET") return;
 
   event.respondWith(
-    fetch(req)
+    fetch(req, { cache: "no-store" })
       .then((resposta) => {
         const copia = resposta.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(req, copia)).catch(() => {});
