@@ -102,9 +102,9 @@ BEGIN
       safe_numeric(p->>'area_total'), safe_numeric(p->>'area_agricola'), safe_numeric(p->>'area_pastagem'),
       safe_numeric(p->>'area_florestal_atual'), safe_numeric(p->>'area_disponivel_floresta'),
       safe_numeric(p->>'area_arrendada'), safe_numeric(p->>'area_propria'), p->>'atividade_principal',
-      CASE WHEN v_gps IS NOT NULL THEN (v_gps->>'lat')::double precision END,
-      CASE WHEN v_gps IS NOT NULL THEN (v_gps->>'lon')::double precision END,
-      CASE WHEN v_gps IS NOT NULL THEN safe_numeric(v_gps->>'acc') END
+      CASE WHEN v_gps IS NOT NULL AND v_gps->>'lat' IS NOT NULL THEN (v_gps->>'lat')::double precision END,
+      CASE WHEN v_gps IS NOT NULL AND v_gps->>'lat' IS NOT NULL THEN (v_gps->>'lon')::double precision END,
+      CASE WHEN v_gps IS NOT NULL AND v_gps->>'lat' IS NOT NULL THEN safe_numeric(v_gps->>'acc') END
     ) RETURNING id INTO v_propriedade_id;
 
     IF (p->>'proprietario') IS NOT NULL AND (p->>'proprietario') <> '' THEN
@@ -129,9 +129,9 @@ BEGIN
       area_pastagem_ha = safe_numeric(p->>'area_pastagem'), area_florestal_atual_ha = safe_numeric(p->>'area_florestal_atual'),
       area_disponivel_floresta_ha = safe_numeric(p->>'area_disponivel_floresta'), area_arrendada_ha = safe_numeric(p->>'area_arrendada'),
       area_propria_ha = safe_numeric(p->>'area_propria'), atividade_principal = p->>'atividade_principal',
-      latitude = CASE WHEN v_gps IS NOT NULL THEN (v_gps->>'lat')::double precision ELSE latitude END,
-      longitude = CASE WHEN v_gps IS NOT NULL THEN (v_gps->>'lon')::double precision ELSE longitude END,
-      precisao_gps_m = CASE WHEN v_gps IS NOT NULL THEN safe_numeric(v_gps->>'acc') ELSE precisao_gps_m END,
+      latitude = CASE WHEN v_gps IS NOT NULL AND v_gps->>'lat' IS NOT NULL THEN (v_gps->>'lat')::double precision ELSE latitude END,
+      longitude = CASE WHEN v_gps IS NOT NULL AND v_gps->>'lat' IS NOT NULL THEN (v_gps->>'lon')::double precision ELSE longitude END,
+      precisao_gps_m = CASE WHEN v_gps IS NOT NULL AND v_gps->>'lat' IS NOT NULL THEN safe_numeric(v_gps->>'acc') ELSE precisao_gps_m END,
       atualizado_em = now()
     WHERE id = v_propriedade_id;
 
@@ -259,8 +259,11 @@ BEGIN
     capacidade_estimada_ton_ano = EXCLUDED.capacidade_estimada_ton_ano, recomendacao = EXCLUDED.recomendacao,
     resumo_executivo = EXCLUDED.resumo_executivo, proximas_acoes = EXCLUDED.proximas_acoes;
 
-  -- geolocalizacao_visita (upsert por visita_id) — só grava se o GPS foi capturado
-  IF v_gps IS NOT NULL THEN
+  -- geolocalizacao_visita (upsert por visita_id) — só grava se o GPS foi
+  -- capturado de verdade. Atenção: quando o JS manda "gps_visita: null",
+  -- isso vira um jsonb 'null' (valor), não um SQL NULL de verdade — por
+  -- isso a checagem certa é no campo 'lat' de dentro, não no objeto todo.
+  IF v_gps IS NOT NULL AND v_gps->>'lat' IS NOT NULL THEN
     INSERT INTO geolocalizacao_visita (visita_id, latitude, longitude, precisao_m, capturado_em, status_sincronizacao)
     VALUES (
       v_visita_id, (v_gps->>'lat')::double precision, (v_gps->>'lon')::double precision, safe_numeric(v_gps->>'acc'),

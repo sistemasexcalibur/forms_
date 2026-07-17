@@ -710,8 +710,8 @@
           visita.fotosPendentes = falhas.map(function (f) { return f.k; });
           persistir(visita);
           if (falhas.length) {
-            var lista = falhas.map(function (f) { return f.tipo; }).join(", ");
-            mostrarPendente("Os dados foram sincronizados, mas " + falhas.length + " foto(s) não subiram agora (" + lista + "). O app tenta reenviar essas fotos automaticamente.");
+            var lista = falhas.map(function (f) { return f.tipo + " (" + f.erro + ")"; }).join(" · ");
+            mostrarPendente("Os dados foram sincronizados, mas " + falhas.length + " foto(s) não subiram: " + lista + ". O app tenta reenviar automaticamente.");
           } else {
             mostrarSucesso("A visita foi enviada e sincronizada com o banco de dados.");
           }
@@ -839,14 +839,18 @@
     overlay.innerHTML =
       '<div class="pending-icon">↻</div>' +
       '<div class="success-title">Salvo — será enviado depois</div>' +
-      '<div class="success-msg">' + msg + '</div>';
+      '<div class="success-msg">' + msg + '</div>' +
+      '<button type="button" class="btn-secondary" id="fecharPendente" style="margin-top:16px;width:auto;padding:8px 20px">OK</button>';
     shell.appendChild(overlay);
     acompanharTeclado(overlay);
-    setTimeout(function () {
+    function fechar() {
+      clearTimeout(timer);
       overlay.remove();
       state.tela = "home";
       render();
-    }, 2200);
+    }
+    overlay.querySelector("#fecharPendente").onclick = fechar;
+    var timer = setTimeout(fechar, 6000);
   }
 
   // ---------------------------------------------------------------------
