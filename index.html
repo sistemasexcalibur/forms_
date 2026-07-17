@@ -201,6 +201,8 @@
   .bar-brand img { height: 20px; width: auto; }
   .bar-brand span { font-size: 13.5px; color: var(--text-muted); }
   .footer-bar { flex-shrink: 0; padding: 12px 16px 16px; background: var(--bg); }
+  .install-banner { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--accent-100); color: var(--accent-700); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 12px; font-size: 12.5px; }
+  .install-banner button { flex-shrink: 0; padding: 8px 14px; font-size: 13px; }
 </style>
 </head>
 <body>
@@ -221,6 +223,21 @@
   var supabaseClient = (typeof supabase !== "undefined")
     ? supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
     : null;
+
+  // Captura o evento de instalação o quanto antes (fora da IIFE principal,
+  // pra não perder o evento caso ele dispare antes do resto do script
+  // carregar). O Chrome/Brave modernos não mostram mais o banner de
+  // instalação sozinhos — é o app quem precisa pedir, com um botão próprio.
+  window.deferredInstallPrompt = null;
+  window.addEventListener("beforeinstallprompt", function (e) {
+    e.preventDefault();
+    window.deferredInstallPrompt = e;
+    window.dispatchEvent(new Event("appInstallReady"));
+  });
+  window.addEventListener("appinstalled", function () {
+    window.deferredInstallPrompt = null;
+    window.dispatchEvent(new Event("appInstallReady"));
+  });
 </script>
 
 <script>
@@ -584,8 +601,11 @@
 
   function renderHome() {
     var html = '';
+    if (window.deferredInstallPrompt) {
+      html += '<div class="install-banner"><span>Instale o app na tela inicial do celular — abre mais rápido e funciona offline.</span><button type="button" class="btn-secondary" id="btnInstalarApp">Instalar</button></div>';
+    }
     if (!visitas.length) {
-      html = '<div class="picker-empty">Nenhuma visita ainda. Toque em "+ Nova visita" para começar.</div>';
+      html += '<div class="picker-empty">Nenhuma visita ainda. Toque em "+ Nova visita" para começar.</div>';
     }
     visitas.forEach(function (v) {
       var prog = 0, campos = { ok: 0, total: 0 };
@@ -603,6 +623,18 @@
         '</div>';
     });
     content.innerHTML = html;
+    var btnInstalar = document.getElementById("btnInstalarApp");
+    if (btnInstalar) {
+      btnInstalar.onclick = function () {
+        var evt = window.deferredInstallPrompt;
+        if (!evt) return;
+        evt.prompt();
+        evt.userChoice.then(function () {
+          window.deferredInstallPrompt = null;
+          renderHome();
+        });
+      };
+    }
     document.querySelectorAll(".visit-card").forEach(function (el) {
       el.onclick = function () { visitaAtualId = Number(el.getAttribute("data-id")); state.tela = "secoes"; render(); };
     });
@@ -718,6 +750,28 @@
   // ---------------------------------------------------------------------
   // confirmacao (bottom sheet centralizado) e tela de sucesso
   // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
+  // Mantém os overlays (seletor, confirmação, sucesso) colados na área
+  // realmente visível da tela — sem isso, quando o teclado do celular
+  // abre, o overlay continua com o tamanho de antes do teclado abrir e
+  // fica parcialmente "escondido" atrás dele, obrigando a rolar pra ver.
+  // ---------------------------------------------------------------------
+  function acompanharTeclado(overlay) {
+    if (!window.visualViewport) return;
+    function ajustar() {
+      if (!document.body.contains(overlay)) {
+        window.visualViewport.removeEventListener("resize", ajustar);
+        window.visualViewport.removeEventListener("scroll", ajustar);
+        return;
+      }
+      overlay.style.height = window.visualViewport.height + "px";
+      overlay.style.top = window.visualViewport.offsetTop + "px";
+    }
+    window.visualViewport.addEventListener("resize", ajustar);
+    window.visualViewport.addEventListener("scroll", ajustar);
+    ajustar();
+  }
+
   function abrirConfirmacao(titulo, msg, textoConfirmar, aoConfirmar) {
     var overlay = document.createElement("div");
     overlay.className = "confirm-overlay";
@@ -731,6 +785,7 @@
         '</div>' +
       '</div>';
     shell.appendChild(overlay);
+    acompanharTeclado(overlay);
     overlay.querySelector("#confCancelar").onclick = function () { overlay.remove(); };
     overlay.querySelector("#confOk").onclick = function () { overlay.remove(); aoConfirmar(); };
   }
@@ -743,6 +798,7 @@
       '<div class="success-title">Enviado com sucesso</div>' +
       '<div class="success-msg">' + msg + '</div>';
     shell.appendChild(overlay);
+    acompanharTeclado(overlay);
     setTimeout(function () {
       overlay.remove();
       state.tela = "home";
@@ -758,6 +814,7 @@
       '<div class="success-title">Salvo — será enviado depois</div>' +
       '<div class="success-msg">' + msg + '</div>';
     shell.appendChild(overlay);
+    acompanharTeclado(overlay);
     setTimeout(function () {
       overlay.remove();
       state.tela = "home";
@@ -778,6 +835,7 @@
         '<div class="picker-list" id="pickerList"></div>' +
       '</div>';
     shell.appendChild(overlay);
+    acompanharTeclado(overlay);
     var listEl = overlay.querySelector("#pickerList");
     var searchEl = overlay.querySelector("#pickerSearch");
     function renderLista(filtro) {
@@ -841,6 +899,7 @@
         '<div class="cal-grid" id="calGrid"></div>' +
       '</div>';
     shell.appendChild(overlay);
+    acompanharTeclado(overlay);
     var gridEl = overlay.querySelector("#calGrid");
     var labelEl = overlay.querySelector("#calLabel");
     function fechar() { overlay.remove(); }
@@ -871,6 +930,7 @@
         '<div class="time-footer"><button type="button" class="btn-primary" id="timeConfirmar">Confirmar</button></div>' +
       '</div>';
     shell.appendChild(overlay);
+    acompanharTeclado(overlay);
     function fechar() { overlay.remove(); }
     overlay.querySelector(".picker-close").onclick = fechar;
     overlay.onclick = function (e) { if (e.target === overlay) fechar(); };
@@ -1152,6 +1212,7 @@
   }
 
   window.addEventListener("online", function () { renderBar(); tentarSincronizarPendentes(); });
+  window.addEventListener("appInstallReady", function () { if (state.tela === "home") renderHome(); });
   window.addEventListener("offline", renderBar);
 
   // ---------------------------------------------------------------------
